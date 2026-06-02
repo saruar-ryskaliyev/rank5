@@ -1,0 +1,22 @@
+# Root
+.DS_Store
+*.iml
+.idea/
+
+# Local / non-source
+skills/
+DESIGN-IS-2026-08-04/
+deliverables/
+
+# Go
+server/bin/
+server/**/__debug_bin*
+server/.env.local
+
+# Android
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/**/build/
+android/captures/
+android/.cxx/
