@@ -1,0 +1,73 @@
+{
+  "id": "would_you_rather",
+  "name": "Would You Rather",
+  "emoji": "🤔",
+  "questions": [
+    {
+      "id": "wyr-1",
+      "prompt": "Pick your vibe for a night out?",
+      "options": [
+        "Concert",
+        "Dinner",
+        "Club",
+        "Board games",
+        "Movie"
+      ]
+    },
+    {
+      "id": "wyr-2",
+      "prompt": "Which job sounds most fun?",
+      "options": [
+        "Chef",
+        "Pilot",
+        "Game designer",
+        "Athlete",
+        "Musician"
+      ]
+    },
+    {
+      "id": "wyr-3",
+      "prompt": "Best way to spend $100?",
+      "options": [
+        "Food",
+        "Clothes",
+        "Games",
+        "Experience",
+        "Save it"
+      ]
+    },
+    {
+      "id": "wyr-4",
+      "prompt": "Which animal would you be?",
+      "options": [
+        "Cat",
+        "Dog",
+        "Owl",
+        "Dolphin",
+        "Fox"
+      ]
+    },
+    {
+      "id": "wyr-5",
+      "prompt": "Preferred communication?",
+      "options": [
+        "Text",
+        "Call",
+        "Voice note",
+        "In person",
+        "Memes"
+      ]
+    },
+    {
+      "id": "wyr-6",
+      "prompt": "Morning person or...?",
+      "options": [
+        "Early bird",
+        "Night owl",
+        "Depends",
+        "Never mornings",
+        "Always mornings"
+      ]
+    }
+  ]
+}

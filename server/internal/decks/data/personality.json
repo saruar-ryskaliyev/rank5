@@ -1,0 +1,73 @@
+{
+  "id": "personality",
+  "name": "Personality",
+  "emoji": "🎭",
+  "questions": [
+    {
+      "id": "pers-1",
+      "prompt": "How do you recharge?",
+      "options": [
+        "Alone time",
+        "Friends",
+        "Nature",
+        "Gaming",
+        "Sleep"
+      ]
+    },
+    {
+      "id": "pers-2",
+      "prompt": "Ideal weekend?",
+      "options": [
+        "Adventure trip",
+        "Stay home",
+        "Party",
+        "Hobby project",
+        "Brunch & chill"
+      ]
+    },
+    {
+      "id": "pers-3",
+      "prompt": "Biggest pet peeve?",
+      "options": [
+        "Being late",
+        "Loud chewing",
+        "Unread texts",
+        "Messy rooms",
+        "Spoilers"
+      ]
+    },
+    {
+      "id": "pers-4",
+      "prompt": "Superpower you'd want?",
+      "options": [
+        "Flight",
+        "Invisibility",
+        "Time travel",
+        "Mind reading",
+        "Teleportation"
+      ]
+    },
+    {
+      "id": "pers-5",
+      "prompt": "Love language?",
+      "options": [
+        "Words",
+        "Gifts",
+        "Time",
+        "Touch",
+        "Acts of service"
+      ]
+    },
+    {
+      "id": "pers-6",
+      "prompt": "Dream vacation?",
+      "options": [
+        "Beach",
+        "Mountains",
+        "City",
+        "Cruise",
+        "Road trip"
+      ]
+    }
+  ]
+}

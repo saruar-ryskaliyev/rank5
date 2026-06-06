@@ -1,0 +1,73 @@
+{
+  "id": "movies",
+  "name": "Movies & Shows",
+  "emoji": "🎬",
+  "questions": [
+    {
+      "id": "movies-1",
+      "prompt": "Best movie genre?",
+      "options": [
+        "Action",
+        "Comedy",
+        "Horror",
+        "Romance",
+        "Sci-Fi"
+      ]
+    },
+    {
+      "id": "movies-2",
+      "prompt": "Who would you watch a marathon with?",
+      "options": [
+        "Best friend",
+        "Partner",
+        "Sibling",
+        "Alone",
+        "Whole group"
+      ]
+    },
+    {
+      "id": "movies-3",
+      "prompt": "Favourite streaming vibe?",
+      "options": [
+        "Binge all night",
+        "One episode",
+        "Movie night",
+        "Reality TV",
+        "Documentaries"
+      ]
+    },
+    {
+      "id": "movies-4",
+      "prompt": "Iconic franchise?",
+      "options": [
+        "Marvel",
+        "Star Wars",
+        "Harry Potter",
+        "Lord of the Rings",
+        "Fast & Furious"
+      ]
+    },
+    {
+      "id": "movies-5",
+      "prompt": "Best snack for movie night?",
+      "options": [
+        "Popcorn",
+        "Candy",
+        "Nachos",
+        "Pizza",
+        "Nothing"
+      ]
+    },
+    {
+      "id": "movies-6",
+      "prompt": "Would rather rewatch?",
+      "options": [
+        "Childhood cartoon",
+        "Teen drama",
+        "Classic film",
+        "Sitcom",
+        "Anime"
+      ]
+    }
+  ]
+}

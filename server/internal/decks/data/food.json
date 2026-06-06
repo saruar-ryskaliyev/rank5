@@ -1,0 +1,73 @@
+{
+  "id": "food",
+  "name": "Food Favorites",
+  "emoji": "🍕",
+  "questions": [
+    {
+      "id": "food-1",
+      "prompt": "Which one is your favourite food?",
+      "options": [
+        "Pizza",
+        "Sushi",
+        "Tacos",
+        "Salad",
+        "Mochi"
+      ]
+    },
+    {
+      "id": "food-2",
+      "prompt": "Best breakfast?",
+      "options": [
+        "Pancakes",
+        "Eggs & toast",
+        "Cereal",
+        "Smoothie",
+        "Bagel"
+      ]
+    },
+    {
+      "id": "food-3",
+      "prompt": "Ideal snack?",
+      "options": [
+        "Chips",
+        "Chocolate",
+        "Fruit",
+        "Popcorn",
+        "Ice cream"
+      ]
+    },
+    {
+      "id": "food-4",
+      "prompt": "Favourite cuisine?",
+      "options": [
+        "Italian",
+        "Japanese",
+        "Mexican",
+        "Indian",
+        "Thai"
+      ]
+    },
+    {
+      "id": "food-5",
+      "prompt": "Best dessert?",
+      "options": [
+        "Cake",
+        "Cookies",
+        "Ice cream",
+        "Pie",
+        "Donuts"
+      ]
+    },
+    {
+      "id": "food-6",
+      "prompt": "Go-to drink?",
+      "options": [
+        "Coffee",
+        "Tea",
+        "Soda",
+        "Water",
+        "Juice"
+      ]
+    }
+  ]
+}
