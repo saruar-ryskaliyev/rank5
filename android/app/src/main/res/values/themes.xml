@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Rank5" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/rank5_background</item>
+    </style>
+</resources>

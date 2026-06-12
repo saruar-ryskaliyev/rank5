@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rank5</string>
+    <string name="brand_tagline">Read the room. Rank the five.</string>
+    <string name="home_title">Who’s playing?</string>
+    <string name="home_intro">Pick a name friends will recognize. You can play without an account.</string>
+    <string name="your_name">Your name</string>
+    <string name="name_validation">Enter at least one character</string>
+    <string name="start_room">Start a new room</string>
+    <string name="start_room_explanation">You’ll choose the deck and invite everyone next.</string>
+    <string name="create_game">Create game</string>
+    <string name="creating_room">Creating room…</string>
+    <string name="or_join_friends">or join friends</string>
+    <string name="room_code">Room code</string>
+    <string name="room_code_placeholder">ABC123</string>
+    <string name="room_code_help">Four to six letters or numbers</string>
+    <string name="room_code_incomplete">Enter at least four characters</string>
+    <string name="join_game">Join game</string>
+    <string name="joining_room">Joining room…</string>
+    <string name="nav_play">Play</string>
+    <string name="nav_decks">Decks</string>
+    <string name="nav_profile">Profile</string>
+    <string name="back">Back</string>
+    <plurals name="deck_mix_availability">
+        <item quantity="one">%1$d questions across %2$d deck</item>
+        <item quantity="other">%1$d questions across %2$d decks</item>
+    </plurals>
+    <string name="deck_mix_even_rotation">Questions rotate evenly across selected decks.</string>
+    <string name="deck_mix_limit">Choose 1–5 decks. At least one deck is always required.</string>
+    <string name="deck_mix_picker_help">Select up to five. Checked decks are included in this game.</string>
+    <string name="source_deck">From %1$s</string>
+    <string name="source_deck_description">Question from the %1$s deck</string>
+    <string name="same_deck_mix_rematch">Same deck mix &amp; settings · starts right away</string>
+</resources>
