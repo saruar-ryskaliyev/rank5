@@ -1,0 +1,479 @@
+{
+  "format": "Ogg Vorbis",
+  "sample_rate_hz": 48000,
+  "channels": 1,
+  "normalization": "category peak targets; minimum 4.5 dBFS headroom",
+  "generator_seed": 5050505,
+  "assets": [
+    {
+      "file": "r5_code_copy.ogg",
+      "family": "utility",
+      "duration_ms": 70,
+      "peak_dbfs_decoded": -11.91,
+      "rms_dbfs_decoded": -25.68,
+      "target_peak_dbfs": -11.5,
+      "size_bytes": 4189,
+      "sha256": "99fa966c481aeb314ef9bbb63b108459a147af43dd80126558f583bce0a679c1"
+    },
+    {
+      "file": "r5_connection_lost.ogg",
+      "family": "network",
+      "duration_ms": 420,
+      "peak_dbfs_decoded": -11.33,
+      "rms_dbfs_decoded": -24.12,
+      "target_peak_dbfs": -11.0,
+      "size_bytes": 6260,
+      "sha256": "9c19c917b956656fa27a776c516da0a165425594dee3a819ec1d4430d30c952f"
+    },
+    {
+      "file": "r5_countdown_1.ogg",
+      "family": "countdown",
+      "duration_ms": 95,
+      "peak_dbfs_decoded": -10.08,
+      "rms_dbfs_decoded": -19.16,
+      "target_peak_dbfs": -10.0,
+      "size_bytes": 4268,
+      "sha256": "f63589902bd57639973cac054b5d673dabb3fc05f060f20f9efdceca04480960"
+    },
+    {
+      "file": "r5_countdown_2.ogg",
+      "family": "countdown",
+      "duration_ms": 95,
+      "peak_dbfs_decoded": -9.97,
+      "rms_dbfs_decoded": -19.29,
+      "target_peak_dbfs": -10.0,
+      "size_bytes": 4249,
+      "sha256": "071a8b70f0c7d7e3e36982985159cc97a4e953731defea0ce7ea30851573a62f"
+    },
+    {
+      "file": "r5_countdown_3.ogg",
+      "family": "countdown",
+      "duration_ms": 95,
+      "peak_dbfs_decoded": -10.2,
+      "rms_dbfs_decoded": -19.07,
+      "target_peak_dbfs": -10.0,
+      "size_bytes": 4166,
+      "sha256": "215b8f8d29cca534a5ce968853490348b4cb30d2a80d44858bd8a99e0bc41503"
+    },
+    {
+      "file": "r5_drag_lift_01.ogg",
+      "family": "drag",
+      "duration_ms": 110,
+      "peak_dbfs_decoded": -13.82,
+      "rms_dbfs_decoded": -24.24,
+      "target_peak_dbfs": -13.0,
+      "size_bytes": 4415,
+      "sha256": "f8d7182b9e4d243adf0a251c292083fcf408ac9773720638d36b455e0aed884d"
+    },
+    {
+      "file": "r5_drag_lift_02.ogg",
+      "family": "drag",
+      "duration_ms": 110,
+      "peak_dbfs_decoded": -12.95,
+      "rms_dbfs_decoded": -24.45,
+      "target_peak_dbfs": -13.0,
+      "size_bytes": 4417,
+      "sha256": "2c1de62f9e779c0968e91a205df278237f95dddb220e03718ffe8ad2cc080a7b"
+    },
+    {
+      "file": "r5_drag_lift_03.ogg",
+      "family": "drag",
+      "duration_ms": 110,
+      "peak_dbfs_decoded": -13.07,
+      "rms_dbfs_decoded": -26.03,
+      "target_peak_dbfs": -13.0,
+      "size_bytes": 4393,
+      "sha256": "df4ab084638a9750e906228ee8171a8a734e968ac397968dbb2c3a79e9a74330"
+    },
+    {
+      "file": "r5_error_01.ogg",
+      "family": "error",
+      "duration_ms": 170,
+      "peak_dbfs_decoded": -8.39,
+      "rms_dbfs_decoded": -22.02,
+      "target_peak_dbfs": -8.5,
+      "size_bytes": 4318,
+      "sha256": "ffacf5f549c1be9dbc38e7f6f5f2bdb02b5c5d1594d7bd5781364f354cfdf259"
+    },
+    {
+      "file": "r5_error_02.ogg",
+      "family": "error",
+      "duration_ms": 170,
+      "peak_dbfs_decoded": -8.53,
+      "rms_dbfs_decoded": -20.43,
+      "target_peak_dbfs": -8.5,
+      "size_bytes": 4329,
+      "sha256": "21af0706d89c33ed87291d289fead47c9edd143b0e10ceb5eb8b8e6b1c3d33d9"
+    },
+    {
+      "file": "r5_everyone_ready.ogg",
+      "family": "ready",
+      "duration_ms": 430,
+      "peak_dbfs_decoded": -7.48,
+      "rms_dbfs_decoded": -17.99,
+      "target_peak_dbfs": -7.5,
+      "size_bytes": 6024,
+      "sha256": "eb40f169f3c5c1d16bf9219fc73e2c9c2091749691a9eceaa02f643a9edebaab"
+    },
+    {
+      "file": "r5_final_results_coop.ogg",
+      "family": "final",
+      "duration_ms": 1520,
+      "peak_dbfs_decoded": -4.93,
+      "rms_dbfs_decoded": -21.78,
+      "target_peak_dbfs": -4.8,
+      "size_bytes": 11220,
+      "sha256": "d3151d7029067658823b2f2b2ff3b00a30fa1c4c27a14a79cfb27ed733f607e9"
+    },
+    {
+      "file": "r5_final_results_versus.ogg",
+      "family": "final",
+      "duration_ms": 1560,
+      "peak_dbfs_decoded": -4.76,
+      "rms_dbfs_decoded": -19.27,
+      "target_peak_dbfs": -4.5,
+      "size_bytes": 10997,
+      "sha256": "16a3db445cd051f128b3e33c25acf1e7e596094248a691bd569b35a2a9025c01"
+    },
+    {
+      "file": "r5_game_start.ogg",
+      "family": "motif",
+      "duration_ms": 650,
+      "peak_dbfs_decoded": -5.85,
+      "rms_dbfs_decoded": -17.29,
+      "target_peak_dbfs": -5.8,
+      "size_bytes": 7914,
+      "sha256": "0f5ff48f4e3866152040d16e29e2416bef7cb51e1aa5e55bf65b6b838c759736"
+    },
+    {
+      "file": "r5_lock_in_01.ogg",
+      "family": "commit",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -6.83,
+      "rms_dbfs_decoded": -18.82,
+      "target_peak_dbfs": -7.0,
+      "size_bytes": 4629,
+      "sha256": "b9acd72b1aa70c1d61f5787f3be6ea9a748f71fc36ef949b7f410209be60b412"
+    },
+    {
+      "file": "r5_lock_in_02.ogg",
+      "family": "commit",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -7.23,
+      "rms_dbfs_decoded": -19.31,
+      "target_peak_dbfs": -7.0,
+      "size_bytes": 4647,
+      "sha256": "609850965ede6c8e4db9e862963ac8ed7b92cd3e8876d5da891b3c28f39cd878"
+    },
+    {
+      "file": "r5_motif_alt_a_paper_steps.ogg",
+      "family": "motif",
+      "duration_ms": 650,
+      "peak_dbfs_decoded": -6.46,
+      "rms_dbfs_decoded": -17.7,
+      "target_peak_dbfs": -6.5,
+      "size_bytes": 7741,
+      "sha256": "129ac47b2951c1580a27484c55245d5b84fe58ebcbcb4b52e2871d5d09f370f9"
+    },
+    {
+      "file": "r5_motif_alt_b_ceramic_arc.ogg",
+      "family": "motif",
+      "duration_ms": 650,
+      "peak_dbfs_decoded": -6.59,
+      "rms_dbfs_decoded": -19.73,
+      "target_peak_dbfs": -6.5,
+      "size_bytes": 7259,
+      "sha256": "b2ea45ae32f57aaca15533718f11e37cb18e74e5297868a577a7254f66cda948"
+    },
+    {
+      "file": "r5_motif_alt_c_glass_bloom.ogg",
+      "family": "motif",
+      "duration_ms": 680,
+      "peak_dbfs_decoded": -6.69,
+      "rms_dbfs_decoded": -19.29,
+      "target_peak_dbfs": -7.0,
+      "size_bytes": 7934,
+      "sha256": "ebefd18cbe36a47d0b5d2f8bbf09e8c01f8c21afefdd4e01ff0e7ee2a801c0bf"
+    },
+    {
+      "file": "r5_player_join_01.ogg",
+      "family": "lobby",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -7.22,
+      "rms_dbfs_decoded": -17.03,
+      "target_peak_dbfs": -7.5,
+      "size_bytes": 4854,
+      "sha256": "ab31e34b2267f7151599aa68668b4cb81f5fdb214abfbabf3964c12624751cdd"
+    },
+    {
+      "file": "r5_player_join_02.ogg",
+      "family": "lobby",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -7.56,
+      "rms_dbfs_decoded": -17.04,
+      "target_peak_dbfs": -7.5,
+      "size_bytes": 4867,
+      "sha256": "bc48f373756bf3b405d10c2421797ef8b43b1ebc13031d468e620ff74af3d602"
+    },
+    {
+      "file": "r5_player_join_03.ogg",
+      "family": "lobby",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -7.52,
+      "rms_dbfs_decoded": -17.35,
+      "target_peak_dbfs": -7.5,
+      "size_bytes": 4811,
+      "sha256": "7522112cc1676a6d798948b7971eff4adcac34332c70e94eb3b0d854912dc50a"
+    },
+    {
+      "file": "r5_player_leave.ogg",
+      "family": "lobby",
+      "duration_ms": 180,
+      "peak_dbfs_decoded": -11.12,
+      "rms_dbfs_decoded": -21.17,
+      "target_peak_dbfs": -11.0,
+      "size_bytes": 4557,
+      "sha256": "e330ce4e6ec38aa222cbb4c8f26b28ee1483919b4c4e8a2070216b04ecd5f956"
+    },
+    {
+      "file": "r5_rank_cross_01.ogg",
+      "family": "drag",
+      "duration_ms": 30,
+      "peak_dbfs_decoded": -15.15,
+      "rms_dbfs_decoded": -23.55,
+      "target_peak_dbfs": -15.0,
+      "size_bytes": 3970,
+      "sha256": "ce26977d80a3f264d89c7bc662bdc65c23b88b03f0f561a3aa9e7964560eab2e"
+    },
+    {
+      "file": "r5_rank_cross_02.ogg",
+      "family": "drag",
+      "duration_ms": 30,
+      "peak_dbfs_decoded": -14.36,
+      "rms_dbfs_decoded": -23.69,
+      "target_peak_dbfs": -15.0,
+      "size_bytes": 4020,
+      "sha256": "5b9c0e2ad0db24d94e6ad33b1fc8b858830e66c6a538919fe865cdd57df6f652"
+    },
+    {
+      "file": "r5_rank_cross_03.ogg",
+      "family": "drag",
+      "duration_ms": 30,
+      "peak_dbfs_decoded": -14.86,
+      "rms_dbfs_decoded": -23.47,
+      "target_peak_dbfs": -15.0,
+      "size_bytes": 3974,
+      "sha256": "e72d45a4b909a1c14ad2585752189aa928875ce6a1b2e55ea2daee8882d0fb0e"
+    },
+    {
+      "file": "r5_rank_cross_04.ogg",
+      "family": "drag",
+      "duration_ms": 30,
+      "peak_dbfs_decoded": -15.23,
+      "rms_dbfs_decoded": -23.37,
+      "target_peak_dbfs": -15.0,
+      "size_bytes": 4000,
+      "sha256": "e3430d292c6368887d6c3a45a963a24ca4d35bec70bc4a128014f1f07a28e4cf"
+    },
+    {
+      "file": "r5_reconnect_success.ogg",
+      "family": "network",
+      "duration_ms": 340,
+      "peak_dbfs_decoded": -8.5,
+      "rms_dbfs_decoded": -21.31,
+      "target_peak_dbfs": -8.5,
+      "size_bytes": 5262,
+      "sha256": "b392a48d92a58c2e3cf51641a70c1da042123249f50455d0c1cf3557198652b8"
+    },
+    {
+      "file": "r5_remote_lock_01.ogg",
+      "family": "remote",
+      "duration_ms": 120,
+      "peak_dbfs_decoded": -12.15,
+      "rms_dbfs_decoded": -23.17,
+      "target_peak_dbfs": -12.0,
+      "size_bytes": 4206,
+      "sha256": "f558f10157c92670f7365869d4e322796fcd3e82ac4688e62cc5d2ce22249061"
+    },
+    {
+      "file": "r5_remote_lock_02.ogg",
+      "family": "remote",
+      "duration_ms": 120,
+      "peak_dbfs_decoded": -11.81,
+      "rms_dbfs_decoded": -22.48,
+      "target_peak_dbfs": -12.0,
+      "size_bytes": 4220,
+      "sha256": "0a7e2f2706124649d099b923a86597ede923f78ae3d43ae390cdd8c6fa2895eb"
+    },
+    {
+      "file": "r5_reveal_card_01.ogg",
+      "family": "reveal",
+      "duration_ms": 160,
+      "peak_dbfs_decoded": -8.9,
+      "rms_dbfs_decoded": -20.24,
+      "target_peak_dbfs": -8.75,
+      "size_bytes": 4577,
+      "sha256": "1be77c58493c761a6354c3e0369a9f3a54e23f98982ed909bd867b8706d9613a"
+    },
+    {
+      "file": "r5_reveal_card_02.ogg",
+      "family": "reveal",
+      "duration_ms": 160,
+      "peak_dbfs_decoded": -8.3,
+      "rms_dbfs_decoded": -20.89,
+      "target_peak_dbfs": -8.5,
+      "size_bytes": 4610,
+      "sha256": "33ca60bd5eee52d31e0469571b0d6c58f5996e08d9a6f023285cf8aa0dd42eed"
+    },
+    {
+      "file": "r5_reveal_card_03.ogg",
+      "family": "reveal",
+      "duration_ms": 160,
+      "peak_dbfs_decoded": -8.41,
+      "rms_dbfs_decoded": -20.45,
+      "target_peak_dbfs": -8.25,
+      "size_bytes": 4655,
+      "sha256": "42b4284b12c9675588da72f2f20a55bce9568404303da57e1c1aa0551ea1264d"
+    },
+    {
+      "file": "r5_reveal_card_04.ogg",
+      "family": "reveal",
+      "duration_ms": 160,
+      "peak_dbfs_decoded": -8.11,
+      "rms_dbfs_decoded": -20.71,
+      "target_peak_dbfs": -8.0,
+      "size_bytes": 4648,
+      "sha256": "8a43a41a974cce2f9879cc30a6c56fd6438931670bed31d0e9ab3d9524400be1"
+    },
+    {
+      "file": "r5_reveal_card_05.ogg",
+      "family": "reveal",
+      "duration_ms": 160,
+      "peak_dbfs_decoded": -8.34,
+      "rms_dbfs_decoded": -19.89,
+      "target_peak_dbfs": -7.75,
+      "size_bytes": 4768,
+      "sha256": "5a6b76db9a9cf5eecfa388acb71529544bbd9106fb56379152f9c903af2d8930"
+    },
+    {
+      "file": "r5_reveal_sequence_reference.ogg",
+      "family": "reveal",
+      "duration_ms": 760,
+      "peak_dbfs_decoded": -6.57,
+      "rms_dbfs_decoded": -19.15,
+      "target_peak_dbfs": -6.8,
+      "size_bytes": 8527,
+      "sha256": "4888dd4595252a38a287d1971933c244c91e28a3d8f58b03a2c553b3156bcdf8"
+    },
+    {
+      "file": "r5_round_ready_01.ogg",
+      "family": "ready",
+      "duration_ms": 120,
+      "peak_dbfs_decoded": -10.93,
+      "rms_dbfs_decoded": -21.21,
+      "target_peak_dbfs": -11.0,
+      "size_bytes": 4379,
+      "sha256": "0f6f7dbe4f802832a226409a64e04dcab98ce6acef23ae0bc54fd916f3913469"
+    },
+    {
+      "file": "r5_round_ready_02.ogg",
+      "family": "ready",
+      "duration_ms": 120,
+      "peak_dbfs_decoded": -11.28,
+      "rms_dbfs_decoded": -21.7,
+      "target_peak_dbfs": -11.0,
+      "size_bytes": 4382,
+      "sha256": "4783b7504b2e30946fc8b3c4566116019b193b3243ef08856faa7ee4f2fcd308"
+    },
+    {
+      "file": "r5_score_countup.ogg",
+      "family": "score",
+      "duration_ms": 780,
+      "peak_dbfs_decoded": -8.72,
+      "rms_dbfs_decoded": -22.25,
+      "target_peak_dbfs": -9.0,
+      "size_bytes": 8249,
+      "sha256": "b072c49bd7c6a1318c3c96eec53ded7a16faa8828d2a7318479232e4d3d3913a"
+    },
+    {
+      "file": "r5_score_not_bad.ogg",
+      "family": "score_outcome",
+      "duration_ms": 320,
+      "peak_dbfs_decoded": -9.36,
+      "rms_dbfs_decoded": -21.68,
+      "target_peak_dbfs": -9.0,
+      "size_bytes": 4932,
+      "sha256": "93f60809a2fedbd49e9486beed955f09b8575fad00e955bdbe655e3ead5480d0"
+    },
+    {
+      "file": "r5_score_perfect.ogg",
+      "family": "score_outcome",
+      "duration_ms": 620,
+      "peak_dbfs_decoded": -5.68,
+      "rms_dbfs_decoded": -17.8,
+      "target_peak_dbfs": -5.8,
+      "size_bytes": 7641,
+      "sha256": "68d91ba56baeae00fb36618251fbb3d55b7a71640bbc7bae90bd5f6b15316db1"
+    },
+    {
+      "file": "r5_score_so_close.ogg",
+      "family": "score_outcome",
+      "duration_ms": 400,
+      "peak_dbfs_decoded": -7.91,
+      "rms_dbfs_decoded": -19.69,
+      "target_peak_dbfs": -8.0,
+      "size_bytes": 5740,
+      "sha256": "ac5258811bef4692951cdb17893fa68ad61414310f5a14f3ebbbc2d5316c77a2"
+    },
+    {
+      "file": "r5_score_way_off.ogg",
+      "family": "score_outcome",
+      "duration_ms": 260,
+      "peak_dbfs_decoded": -9.8,
+      "rms_dbfs_decoded": -22.52,
+      "target_peak_dbfs": -10.0,
+      "size_bytes": 4550,
+      "sha256": "b8dd0d2829a802769a2c1a1221cfc8ea3d90f718b407a8d5aa2ef0f340828116"
+    },
+    {
+      "file": "r5_selection_tick_01.ogg",
+      "family": "selection",
+      "duration_ms": 48,
+      "peak_dbfs_decoded": -12.79,
+      "rms_dbfs_decoded": -21.4,
+      "target_peak_dbfs": -12.5,
+      "size_bytes": 4061,
+      "sha256": "1c7c76a1ba9a4857d7445f6dec493936021285398033310b3dd1d04b333f597c"
+    },
+    {
+      "file": "r5_selection_tick_02.ogg",
+      "family": "selection",
+      "duration_ms": 48,
+      "peak_dbfs_decoded": -12.46,
+      "rms_dbfs_decoded": -21.54,
+      "target_peak_dbfs": -12.5,
+      "size_bytes": 4076,
+      "sha256": "fb44cbc58968d79fdc9c0cd4aa1395127ab052dc4968c3aab24f63f53f3373ef"
+    },
+    {
+      "file": "r5_selection_tick_03.ogg",
+      "family": "selection",
+      "duration_ms": 48,
+      "peak_dbfs_decoded": -12.66,
+      "rms_dbfs_decoded": -21.35,
+      "target_peak_dbfs": -12.5,
+      "size_bytes": 4032,
+      "sha256": "b6952440a2c7f312dbdb87839c01abe48c05ca4b17dd84f279f61803e616b486"
+    },
+    {
+      "file": "r5_time_up.ogg",
+      "family": "countdown",
+      "duration_ms": 260,
+      "peak_dbfs_decoded": -7.45,
+      "rms_dbfs_decoded": -17.73,
+      "target_peak_dbfs": -7.5,
+      "size_bytes": 4853,
+      "sha256": "f272d7643b85c99585390e7a28abc605e8e24181d623003cb72b315a3d7d08da"
+    }
+  ]
+}
