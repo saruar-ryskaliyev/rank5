@@ -13,8 +13,10 @@ import io.rank5.app.auth.AuthRepository
 import io.rank5.app.auth.AuthState
 import io.rank5.app.audio.Rank5SoundPlayer
 import io.rank5.app.deck.DeckRepository
+import io.rank5.app.deck.DownloadedDeckStore
 import io.rank5.app.deck.DecksViewModel
 import io.rank5.app.game.GameViewModel
+import io.rank5.app.offline.OfflineGameViewModel
 import io.rank5.app.stats.StatsRepository
 import io.rank5.app.stats.StatsViewModel
 import io.rank5.app.ui.Rank5App
@@ -26,7 +28,8 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val authRepo by lazy { AuthRepository(applicationContext) }
-    private val deckRepo by lazy { DeckRepository(authRepo) }
+    private val downloadedDeckStore by lazy { DownloadedDeckStore(applicationContext) }
+    private val deckRepo by lazy { DeckRepository(authRepo, downloadedDeckStore) }
     private val statsRepo by lazy { StatsRepository(authRepo) }
     private val soundPlayer by lazy { Rank5SoundPlayer(applicationContext) }
 
@@ -66,6 +69,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val offlineVm: OfflineGameViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                OfflineGameViewModel(deckRepo) as T
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -76,6 +87,7 @@ class MainActivity : ComponentActivity() {
                     authVm = authVm,
                     decksVm = decksVm,
                     statsVm = statsVm,
+                    offlineVm = offlineVm,
                     soundPlayer = soundPlayer,
                 )
             }

@@ -2,8 +2,20 @@
 <resources>
     <string name="app_name">Rank5</string>
     <string name="brand_tagline">Read the room. Rank the five.</string>
-    <string name="home_title">Who’s playing?</string>
-    <string name="home_intro">Pick a name friends will recognize. You can play without an account.</string>
+    <string name="choose_game_mode">Choose a game mode</string>
+    <string name="choose_game_mode_help">Play together here or connect everyone’s phones.</string>
+    <string name="play_offline">Offline</string>
+    <string name="play_offline_help">Share this phone. No connection needed.</string>
+    <string name="pass_and_play">Pass &amp; Play</string>
+    <string name="pass_and_play_help">2–8 players · one phone</string>
+    <string name="play_online">Online</string>
+    <string name="play_online_help">Each player joins on their own phone.</string>
+    <string name="create_room">Create room</string>
+    <string name="create_room_help">Host a new game</string>
+    <string name="join_room">Join room</string>
+    <string name="join_room_help">Enter a friend’s code</string>
+    <string name="create_room_setup">Create your room</string>
+    <string name="join_room_setup">Join a room</string>
     <string name="your_name">Your name</string>
     <string name="name_validation">Enter at least one character</string>
     <string name="start_room">Start a new room</string>

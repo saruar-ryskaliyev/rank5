@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -27,6 +28,8 @@ data class DecksUiState(
     val savedError: String? = null,
     val savedOperations: Set<String> = emptySet(),
     val communityHasMore: Boolean = false,
+    val downloadedDecks: List<Deck> = emptyList(),
+    val downloadOperations: Set<String> = emptySet(),
     val detail: Deck? = null,
     val editorTitle: String = "",
     val editorEmoji: String = "🎯",
@@ -87,6 +90,14 @@ class DecksViewModel(
 
     private var searchJob: Job? = null
     private var generationJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            repo.downloadedDecks.collect { downloaded ->
+                _state.update { it.copy(downloadedDecks = downloaded) }
+            }
+        }
+    }
 
     private fun restoreEditorState(): DecksUiState {
         if (savedStateHandle.get<Boolean>("editor_active") != true) return DecksUiState()
@@ -387,6 +398,42 @@ class DecksViewModel(
                 _state.value = savedOperationSucceeded(_state.value, deckId, refreshed, wasSaved)
             } catch (_: Exception) {
                 _state.value = savedOperationFailed(_state.value, deckId, wasSaved)
+            }
+        }
+    }
+
+    fun toggleDownloaded() {
+        val deck = _state.value.detail ?: return
+        if (deck.isBuiltin || deck.id in _state.value.downloadOperations) return
+        val wasDownloaded = _state.value.downloadedDecks.any { it.id == deck.id }
+        viewModelScope.launch {
+            _state.update { it.copy(downloadOperations = it.downloadOperations + deck.id) }
+            try {
+                if (wasDownloaded) {
+                    repo.removeDownload(deck.id)
+                    _state.update {
+                        it.copy(
+                            downloadOperations = it.downloadOperations - deck.id,
+                            statusMessage = "Removed from this device",
+                        )
+                    }
+                } else {
+                    val downloaded = repo.download(deck.id)
+                    _state.update {
+                        it.copy(
+                            detail = downloaded,
+                            downloadOperations = it.downloadOperations - deck.id,
+                            statusMessage = "Available offline",
+                        )
+                    }
+                }
+            } catch (_: Exception) {
+                _state.update {
+                    it.copy(
+                        downloadOperations = it.downloadOperations - deck.id,
+                        statusMessage = "Couldn’t update offline availability. Check your connection.",
+                    )
+                }
             }
         }
     }

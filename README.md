@@ -85,6 +85,15 @@ Verified: debug APK builds; the full game protocol is covered by `server/scripts
 2. Host picks a deck and round count → **Start**
 3. Each round one player is in the spotlight: everyone **Lock In** simultaneously (subject ranks honestly, others predict), then reveal + **Ready** to continue
 
+### Offline Pass & Play
+
+Choose **Pass & Play** on the Play screen for a local game with 2–8 people on
+one Android device. Official decks are bundled in the APK, and community or
+owned decks can be downloaded from the same Decks library. Pass & Play uses
+everything marked **Available offline**, without a server or internet
+connection. A private handoff screen hides the question and previous ranking
+between every player's turn.
+
 ## Repo layout
 
 ```

@@ -35,12 +35,20 @@ class Rank5AccessibilityTest {
                     state = UiState(),
                     snackbarHostState = SnackbarHostState(),
                     onNickname = {}, onJoinCode = {}, onCreate = {}, onJoin = {},
+                    onPassAndPlay = {},
                 )
             }
         }
-        compose.onNodeWithText("Who’s playing?").assertIsDisplayed()
-        compose.onNodeWithText("Create game").assertIsNotEnabled()
-        compose.onNodeWithText("Four to six letters or numbers").assertIsDisplayed()
+        compose.onNodeWithText("Choose a game mode").assertIsDisplayed()
+        compose.onNodeWithText("Pass & Play").assertIsDisplayed().assertHasClickAction()
+        compose.onNodeWithText("Create room").assertIsDisplayed().assertHasClickAction()
+        compose.onNodeWithText("Join room").assertIsDisplayed().assertHasClickAction()
+        compose.onNodeWithText("Your name").assertDoesNotExist()
+
+        compose.onNodeWithText("Join room").performClick()
+        compose.onNodeWithText("Your name").assertIsDisplayed()
+        compose.onNodeWithText("Room code").assertIsDisplayed()
+        compose.onNodeWithText("Join game").assertIsNotEnabled()
     }
 
     @Test fun savedActionAnnouncesSelectedState() {

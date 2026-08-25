@@ -22,7 +22,7 @@ private fun HomePreview() {
         HomeScreen(
             state = UiState(nickname = "Maya"),
             snackbarHostState = remember { SnackbarHostState() },
-            onNickname = {}, onJoinCode = {}, onCreate = {}, onJoin = {},
+            onNickname = {}, onJoinCode = {}, onCreate = {}, onJoin = {}, onPassAndPlay = {},
         )
     }
 }

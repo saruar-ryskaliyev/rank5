@@ -21,6 +21,8 @@ import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,6 +64,8 @@ fun DeckDetailScreen(
     signedIn: Boolean,
     isSaved: Boolean,
     savingSaved: Boolean,
+    isDownloaded: Boolean = false,
+    downloading: Boolean = false,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onUseDeck: (Deck) -> Unit,
@@ -71,6 +75,7 @@ fun DeckDetailScreen(
     onUnpublish: () -> Unit,
     onReport: (String) -> Unit,
     onToggleSaved: () -> Unit,
+    onToggleDownloaded: () -> Unit = {},
     onGoSignIn: () -> Unit,
     onGoSignInForSave: () -> Unit = onGoSignIn,
     resumeReportAfterSignIn: Boolean = false,
@@ -164,6 +169,14 @@ fun DeckDetailScreen(
             }
             Spacer(Modifier.height(Spacing.md))
         }
+
+        OfflineAvailabilityAction(
+            deck = current,
+            downloaded = isDownloaded,
+            loading = downloading,
+            onToggle = onToggleDownloaded,
+        )
+        Spacer(Modifier.height(Spacing.md))
 
         Row(verticalAlignment = Alignment.Bottom) {
             Column(Modifier.weight(1f)) {
@@ -274,6 +287,65 @@ fun DeckDetailScreen(
         },
         dismissButton = { TextButton(onClick = { showReport = false }) { Text("Cancel") } },
     )
+}
+
+@Composable
+private fun OfflineAvailabilityAction(
+    deck: Deck,
+    downloaded: Boolean,
+    loading: Boolean,
+    onToggle: () -> Unit,
+) {
+    if (deck.isBuiltin) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+            Row(
+                modifier = Modifier.padding(Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Rounded.DownloadDone,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(Spacing.md))
+                Column {
+                    Text("Available offline", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Included with Rank5",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        return
+    }
+
+    OutlinedButton(
+        onClick = onToggle,
+        enabled = !loading,
+        modifier = Modifier.fillMaxWidth().semantics {
+            stateDescription = if (downloaded) "Available offline" else "Not downloaded"
+        },
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                Modifier.size(Sizes.ctaSpinner),
+                strokeWidth = Sizes.ctaSpinnerStroke,
+            )
+        } else {
+            Icon(
+                if (downloaded) Icons.Rounded.DownloadDone else Icons.Rounded.Download,
+                contentDescription = null,
+            )
+        }
+        Spacer(Modifier.width(Spacing.sm))
+        Text(if (downloaded) "Remove download" else "Download for offline play")
+    }
 }
 
 @Composable

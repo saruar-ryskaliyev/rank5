@@ -49,13 +49,15 @@ import io.rank5.app.game.GameViewModel
 import io.rank5.app.game.MaxSelectedDecks
 import io.rank5.app.game.Screen
 import io.rank5.app.game.UiState
+import io.rank5.app.offline.OfflineGameViewModel
+import io.rank5.app.offline.OfflineScreen
 import io.rank5.app.stats.GuestResultClaim
 import io.rank5.app.stats.StatsViewModel
 import io.rank5.app.ui.theme.Motion
 import kotlinx.coroutines.launch
 
 private enum class AppTab { Play, Decks, Profile }
-private enum class AppDestination { LiveGame, Play, Decks, Profile }
+private enum class AppDestination { LiveGame, OfflineGame, Play, Decks, Profile }
 
 @Composable
 fun Rank5App(
@@ -63,6 +65,7 @@ fun Rank5App(
     authVm: AuthViewModel,
     decksVm: DecksViewModel,
     statsVm: StatsViewModel,
+    offlineVm: OfflineGameViewModel,
     soundPlayer: Rank5SoundPlayer,
 ) {
     val state by gameVm.state.collectAsStateWithLifecycle()
@@ -71,6 +74,7 @@ fun Rank5App(
     val authStatus by authVm.status.collectAsStateWithLifecycle()
     val decksState by decksVm.state.collectAsStateWithLifecycle()
     val statsState by statsVm.state.collectAsStateWithLifecycle()
+    val offlineState by offlineVm.state.collectAsStateWithLifecycle()
     val audioSettings by soundPlayer.settings.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -80,7 +84,8 @@ fun Rank5App(
     var pendingGuestClaim by remember { mutableStateOf<GuestResultClaim?>(null) }
     var returnToDecksAfterSignIn by remember { mutableStateOf(false) }
     var resumeReportAfterSignIn by remember { mutableStateOf(false) }
-    val inLiveGame = state.screen != Screen.Home
+    val inOnlineGame = state.screen != Screen.Home
+    val inLiveGame = inOnlineGame || offlineState.active
     val showBottomBar = !inLiveGame &&
         (decksState.route is DecksRoute.List)
     val navColors = NavigationBarItemDefaults.colors(
@@ -131,7 +136,15 @@ fun Rank5App(
     SoundEventObserver(state = state, soundPlayer = soundPlayer)
 
     var showLeaveDialog by remember { mutableStateOf(false) }
-    BackHandler(enabled = inLiveGame) { showLeaveDialog = true }
+    var showOfflineLeaveDialog by remember { mutableStateOf(false) }
+    BackHandler(enabled = inOnlineGame) { showLeaveDialog = true }
+    BackHandler(enabled = offlineState.active) {
+        if (offlineState.screen in setOf(OfflineScreen.Setup, OfflineScreen.Results)) {
+            offlineVm.close()
+        } else {
+            showOfflineLeaveDialog = true
+        }
+    }
     BackHandler(enabled = !inLiveGame && decksState.route !is DecksRoute.List && tab == AppTab.Decks) {
         when (val route = decksState.route) {
             is DecksRoute.Editor -> {
@@ -170,6 +183,29 @@ fun Rank5App(
                         contentColor = MaterialTheme.colorScheme.secondary,
                     ),
                 ) { Text("Stay") }
+            },
+        )
+    }
+
+    if (showOfflineLeaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showOfflineLeaveDialog = false },
+            title = { Text("Leave Pass & Play?") },
+            text = { Text("This game’s progress is stored only on this phone and will be lost.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showOfflineLeaveDialog = false
+                        offlineVm.close()
+                        tab = AppTab.Play
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) { Text("Leave game") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOfflineLeaveDialog = false }) { Text("Keep playing") }
             },
         )
     }
@@ -216,7 +252,8 @@ fun Rank5App(
                 .padding(padding),
         ) {
             val destination = when {
-                inLiveGame -> AppDestination.LiveGame
+                inOnlineGame -> AppDestination.LiveGame
+                offlineState.active -> AppDestination.OfflineGame
                 tab == AppTab.Play -> AppDestination.Play
                 tab == AppTab.Decks -> AppDestination.Decks
                 else -> AppDestination.Profile
@@ -261,6 +298,52 @@ fun Rank5App(
                     onRequestLeave = { showLeaveDialog = true },
                     soundPlayer = soundPlayer,
                 )
+                AppDestination.OfflineGame -> OfflineGameFlow(
+                    state = offlineState,
+                    snackbarHostState = snackbarHostState,
+                    onPlayerName = offlineVm::updatePlayer,
+                    onAddPlayer = offlineVm::addPlayer,
+                    onRemovePlayer = offlineVm::removePlayer,
+                    onToggleDeck = offlineVm::toggleDeck,
+                    onBrowseDecks = {
+                        offlineVm.close()
+                        tab = AppTab.Decks
+                        decksVm.openList()
+                    },
+                    onSelectRounds = offlineVm::selectRounds,
+                    onStart = {
+                        soundPlayer.playGameStart()
+                        offlineVm.start()
+                    },
+                    onRevealToActor = offlineVm::revealToActor,
+                    onReorder = offlineVm::reorder,
+                    onLockIn = {
+                        soundPlayer.playLockIn()
+                        offlineVm.lockIn()
+                    },
+                    onNextRound = {
+                        if (offlineState.roundIndex == offlineState.schedule.lastIndex) {
+                            soundPlayer.playFinalResults()
+                        } else {
+                            soundPlayer.playRoundReady()
+                        }
+                        offlineVm.nextRound()
+                    },
+                    onRematch = {
+                        soundPlayer.playGameStart()
+                        offlineVm.rematch()
+                    },
+                    onExit = {
+                        if (offlineState.screen in setOf(OfflineScreen.Setup, OfflineScreen.Results)) {
+                            offlineVm.close()
+                            tab = AppTab.Play
+                        } else {
+                            showOfflineLeaveDialog = true
+                        }
+                    },
+                    onDragStart = soundPlayer::playDragLift,
+                    onRankCross = soundPlayer::playRankCross,
+                )
                 AppDestination.Play -> HomeScreen(
                     state = state,
                     snackbarHostState = snackbarHostState,
@@ -268,6 +351,10 @@ fun Rank5App(
                     onJoinCode = gameVm::updateJoinCode,
                     onCreate = gameVm::createAndJoin,
                     onJoin = gameVm::joinRoom,
+                    onPassAndPlay = {
+                        soundPlayer.playSelectionTick()
+                        offlineVm.open()
+                    },
                 )
                 AppDestination.Decks -> DecksTab(
                     decksState = decksState,
@@ -573,6 +660,10 @@ private fun DecksTab(
                 signedIn = signedIn,
                 isSaved = deck?.let { current -> decksState.saved.any { it.id == current.id } } == true,
                 savingSaved = deck?.id?.let { it in decksState.savedOperations } == true,
+                isDownloaded = deck?.id?.let { id ->
+                    decksState.downloadedDecks.any { it.id == id }
+                } == true,
+                downloading = deck?.id?.let { it in decksState.downloadOperations } == true,
                 snackbarHostState = snackbarHostState,
                 onBack = decksVm::backFromDetail,
                 onUseDeck = onUseDeck,
@@ -582,6 +673,7 @@ private fun DecksTab(
                 onUnpublish = decksVm::unpublishCurrent,
                 onReport = decksVm::reportCurrent,
                 onToggleSaved = { deck?.let { decksVm.toggleSaved(it.id) } },
+                onToggleDownloaded = decksVm::toggleDownloaded,
                 onGoSignIn = onGoSignIn,
                 onGoSignInForSave = onGoSignInForSave,
                 resumeReportAfterSignIn = resumeReportAfterSignIn,

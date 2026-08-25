@@ -50,6 +50,9 @@ android {
         compose = true
         buildConfig = true
     }
+    sourceSets {
+        getByName("main").assets.srcDir("../../server/internal/decks/data")
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

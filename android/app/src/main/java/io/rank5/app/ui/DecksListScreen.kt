@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -39,13 +41,14 @@ import androidx.compose.ui.Modifier
 import io.rank5.app.deck.DeckSummary
 import io.rank5.app.deck.DecksUiState
 import io.rank5.app.deck.unifiedDeckLibrary
+import io.rank5.app.deck.toSummary
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
-enum class DeckFilter { All, Mine, Saved, Community }
+enum class DeckFilter { All, AvailableOffline, Mine, Saved, Community }
 
 @Composable
 fun DecksListScreen(
@@ -68,13 +71,17 @@ fun DecksListScreen(
     val query = state.communityQuery.trim()
     val mine = state.mine.filter { query.isEmpty() || it.title.contains(query, true) }
     val ownedIds = state.mine.mapTo(mutableSetOf()) { it.id }
-    val all = unifiedDeckLibrary(mine, state.saved + state.community)
+    val downloadedSummaries = state.downloadedDecks.map { it.toSummary() }
+    val downloadedIds = state.downloadedDecks.mapTo(hashSetOf()) { it.id }
+    val all = unifiedDeckLibrary(mine, downloadedSummaries + state.saved + state.community)
     val visible = when (filter) {
         DeckFilter.All -> all
+        DeckFilter.AvailableOffline -> all.filter { it.id in downloadedIds }
         DeckFilter.Mine -> mine
         DeckFilter.Saved -> state.saved.filter { query.isEmpty() || it.title.contains(query, true) }
         DeckFilter.Community -> all.filterNot { it.id in ownedIds }
     }
+    val remotePagination = filter == DeckFilter.All || filter == DeckFilter.Community
 
     GameScaffold(
         snackbarHostState = snackbarHostState,
@@ -107,6 +114,7 @@ fun DecksListScreen(
             DeckFilter.entries.forEach { item ->
                 val label = when (item) {
                     DeckFilter.All -> "All"
+                    DeckFilter.AvailableOffline -> "Available offline"
                     DeckFilter.Mine -> "Mine"
                     DeckFilter.Saved -> "Saved"
                     DeckFilter.Community -> "Community"
@@ -159,6 +167,7 @@ fun DecksListScreen(
                     Text(
                         if (filter == DeckFilter.Mine) "Create your first deck to see it here."
                         else if (filter == DeckFilter.Saved) "Bookmark an official or public deck to find it here."
+                        else if (filter == DeckFilter.AvailableOffline) "Download a deck to use it without internet."
                         else "Try a shorter search or another filter.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -169,7 +178,9 @@ fun DecksListScreen(
                 if (maxWidth >= Sizes.responsiveBreakpoint) {
                     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         DeckLibraryList(
-                            visible, ownedIds, state.communityLoading, state.communityHasMore,
+                            visible, ownedIds, downloadedIds,
+                            state.communityLoading && remotePagination,
+                            state.communityHasMore && remotePagination,
                             onOpenDeck, onLoadMore, Modifier.weight(1f),
                         )
                         Surface(
@@ -190,7 +201,9 @@ fun DecksListScreen(
                     }
                 } else {
                     DeckLibraryList(
-                        visible, ownedIds, state.communityLoading, state.communityHasMore,
+                        visible, ownedIds, downloadedIds,
+                        state.communityLoading && remotePagination,
+                        state.communityHasMore && remotePagination,
                         onOpenDeck, onLoadMore, Modifier.fillMaxSize(),
                     )
                 }
@@ -216,6 +229,7 @@ fun DecksListScreen(
 private fun DeckLibraryList(
     decks: List<DeckSummary>,
     ownedIds: Set<String>,
+    downloadedIds: Set<String>,
     loading: Boolean,
     hasMore: Boolean,
     onOpen: (String) -> Unit,
@@ -223,7 +237,9 @@ private fun DeckLibraryList(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        items(decks, key = { it.id }) { deck -> DeckRow(deck, deck.id in ownedIds, onOpen) }
+        items(decks, key = { it.id }) {
+            deck -> DeckRow(deck, deck.id in ownedIds, deck.id in downloadedIds, onOpen)
+        }
         if (loading) item("loading") {
             Box(Modifier.fillMaxWidth().padding(Spacing.md), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -236,7 +252,12 @@ private fun DeckLibraryList(
 }
 
 @Composable
-private fun DeckRow(deck: DeckSummary, owned: Boolean, onOpen: (String) -> Unit) {
+private fun DeckRow(
+    deck: DeckSummary,
+    owned: Boolean,
+    downloaded: Boolean,
+    onOpen: (String) -> Unit,
+) {
     Surface(
         modifier = Modifier.fillMaxWidth().clickable { onOpen(deck.id) },
         shape = MaterialTheme.shapes.medium,
@@ -254,12 +275,31 @@ private fun DeckRow(deck: DeckSummary, owned: Boolean, onOpen: (String) -> Unit)
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
-                when { deck.isBuiltin -> "Official"; owned && deck.visibility == "public" -> "Published";
-                    owned -> "Private"; else -> "Public" },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    when { deck.isBuiltin -> "Official"; owned && deck.visibility == "public" -> "Published";
+                        owned -> "Private"; else -> "Public" },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                if (downloaded) {
+                    Spacer(Modifier.height(Spacing.xs))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Rounded.DownloadDone,
+                            contentDescription = null,
+                            modifier = Modifier.size(Sizes.metadataIcon),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            "Available offline",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }
 }

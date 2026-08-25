@@ -48,6 +48,18 @@ data class Deck(
     val isRemoved: Boolean get() = visibility == "removed"
 }
 
+fun Deck.toSummary(): DeckSummary = DeckSummary(
+    id = id,
+    title = title,
+    emoji = emoji,
+    isBuiltin = isBuiltin,
+    ownerId = ownerId,
+    questionCount = questions.size,
+    visibility = visibility,
+    ownerName = ownerName,
+    publishedAt = publishedAt,
+)
+
 @Serializable
 data class DeckWriteRequest(
     val title: String,
