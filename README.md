@@ -2,6 +2,14 @@
 
 Multiplayer party game inspired by [rank5.io](https://rank5.io/): create a room, friends join with a code, and everyone ranks / predicts five options each round.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="Rank5 game mode selection" width="30%" />
+  <img src="docs/screenshots/pass-and-play.png" alt="Rank5 Pass & Play setup" width="30%" />
+  <img src="docs/screenshots/decks.png" alt="Rank5 deck library" width="30%" />
+</p>
+
 ## Stack
 
 - **Backend**: Go, WebSockets (`coder/websocket`), in-memory room actors, embedded JSON decks
