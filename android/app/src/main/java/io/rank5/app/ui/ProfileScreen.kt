@@ -392,12 +392,7 @@ private fun StatsContent(stats: StatsResponse) {
         StatTile(
             value = stats.gamesPlayed.toString(),
             label = "Games played",
-            modifier = Modifier.weight(1f),
-        )
-        StatTile(
-            value = "${stats.versus.winRatePct}%",
-            label = "Versus win rate",
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 
@@ -412,7 +407,7 @@ private fun StatsContent(stats: StatsResponse) {
 
     if (stats.coop.bestByRounds.isNotEmpty()) {
         Spacer(Modifier.height(Spacing.md))
-        Text("Co-op bests", style = MaterialTheme.typography.titleMedium)
+        Text("Best team scores", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(Spacing.sm))
         stats.coop.bestByRounds.forEach { best ->
             Surface(

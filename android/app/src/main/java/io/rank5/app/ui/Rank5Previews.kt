@@ -164,7 +164,7 @@ private fun LobbyDeckMixPreview() {
                 ),
             ),
             snackbarHostState = remember { SnackbarHostState() },
-            onSelectDeck = {}, onRemoveDeck = {}, onSelectMode = {}, onSelectRounds = {},
+            onSelectDeck = {}, onRemoveDeck = {}, onSelectRounds = {},
             onLoadDeckLibrary = {}, onCommunityQuery = {}, onPickCommunityDeck = {},
             onStart = {}, onLeave = {},
         )
@@ -187,7 +187,7 @@ private fun LobbySingleDeckPreview() {
                 ),
             ),
             snackbarHostState = remember { SnackbarHostState() },
-            onSelectDeck = {}, onRemoveDeck = {}, onSelectMode = {}, onSelectRounds = {},
+            onSelectDeck = {}, onRemoveDeck = {}, onSelectRounds = {},
             onLoadDeckLibrary = {}, onCommunityQuery = {}, onPickCommunityDeck = {},
             onStart = {}, onLeave = {},
         )

@@ -29,7 +29,7 @@ data class AttachAccountPayload(val authToken: String)
 
 @Serializable
 data class StartGamePayload(
-    val mode: String,
+    val mode: String = "coop",
     val deckIds: List<String>,
     val deckId: String = deckIds.firstOrNull().orEmpty(),
     val rounds: Int,

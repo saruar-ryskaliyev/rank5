@@ -21,7 +21,7 @@ func TestStartGamePayloadLegacyDeckIDFallback(t *testing.T) {
 
 func TestReconnectSnapshotPreservesMultiDeckSettings(t *testing.T) {
 	state := game.NewState("ABCD")
-	state.Mode = game.ModeVersus
+	state.Mode = game.ModeCoop
 	state.DeckID = "food"
 	state.DeckIDs = []string{"food", "movies"}
 	state.TotalRounds = 6

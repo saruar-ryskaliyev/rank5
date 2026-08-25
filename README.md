@@ -22,7 +22,7 @@ The development server loads `server/.env.local` and fails fast when required
 database or authentication settings are missing. Database migrations and
 built-in deck seeding run automatically during startup.
 
-E2E (coop + versus) against a running server:
+E2E against a running server:
 
 ```bash
 cd server
@@ -77,12 +77,12 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 Default debug server URL is `http://127.0.0.1:8080` — run `adb reverse tcp:8080 tcp:8080` for each emulator (or point a physical device at your LAN IP).
 
-Verified: debug APK builds; full game protocol (coop + versus) is covered by `server/scripts/e2e`.
+Verified: debug APK builds; the full game protocol is covered by `server/scripts/e2e`.
 
 ### Play flow
 
 1. Enter a nickname → **Create room** (share the code) or **Join room**
-2. Host picks Co-op / Versus, deck, and round count → **Start**
+2. Host picks a deck and round count → **Start**
 3. Each round one player is in the spotlight: everyone **Lock In** simultaneously (subject ranks honestly, others predict), then reveal + **Ready** to continue
 
 ## Repo layout

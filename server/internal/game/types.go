@@ -16,8 +16,7 @@ const (
 type Mode string
 
 const (
-	ModeCoop   Mode = "coop"
-	ModeVersus Mode = "versus"
+	ModeCoop Mode = "coop"
 )
 
 // Phase durations.

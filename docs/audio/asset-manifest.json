@@ -126,16 +126,6 @@
       "sha256": "d3151d7029067658823b2f2b2ff3b00a30fa1c4c27a14a79cfb27ed733f607e9"
     },
     {
-      "file": "r5_final_results_versus.ogg",
-      "family": "final",
-      "duration_ms": 1560,
-      "peak_dbfs_decoded": -4.76,
-      "rms_dbfs_decoded": -19.27,
-      "target_peak_dbfs": -4.5,
-      "size_bytes": 10997,
-      "sha256": "16a3db445cd051f128b3e33c25acf1e7e596094248a691bd569b35a2a9025c01"
-    },
-    {
       "file": "r5_game_start.ogg",
       "family": "motif",
       "duration_ms": 650,

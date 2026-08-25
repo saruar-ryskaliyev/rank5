@@ -16,7 +16,7 @@ func TestFinishedRoundsAccumulatedOncePerGame(t *testing.T) {
 		{ID: "q1", Prompt: "Q1", Options: []string{"a", "b", "c", "d", "e"}},
 		{ID: "q2", Prompt: "Q2", Options: []string{"a", "b", "c", "d", "e"}},
 	}
-	if err := s.StartGame("h", game.ModeVersus, []string{"food"}, 2, qs, nil); err != nil {
+	if err := s.StartGame("h", game.ModeCoop, []string{"food"}, 2, qs, nil); err != nil {
 		t.Fatal(err)
 	}
 	playRound := func() {
@@ -59,7 +59,7 @@ func TestFinishedRoundsAccumulatedOncePerGame(t *testing.T) {
 	}
 
 	// Rematch clears history.
-	if err := s.StartGame("h", game.ModeVersus, []string{"food"}, 2, qs, nil); err != nil {
+	if err := s.StartGame("h", game.ModeCoop, []string{"food"}, 2, qs, nil); err != nil {
 		t.Fatal(err)
 	}
 	if len(s.FinishedRounds) != 0 {

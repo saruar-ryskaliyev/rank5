@@ -86,7 +86,7 @@ class Rank5AccessibilityTest {
                         ),
                     ),
                     snackbarHostState = SnackbarHostState(),
-                    onSelectDeck = {}, onRemoveDeck = {}, onSelectMode = {}, onSelectRounds = {},
+                    onSelectDeck = {}, onRemoveDeck = {}, onSelectRounds = {},
                     onLoadDeckLibrary = {}, onCommunityQuery = {}, onPickCommunityDeck = {},
                     onStart = {}, onLeave = {},
                 )

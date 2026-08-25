@@ -56,7 +56,6 @@ Priority is a playback/preemption class: **P4 phase-critical**, **P3 outcome/tra
 | Round ready — `r5_round_ready_01..02` | One remote player becomes ready for the next round | 120 ms | Small affirmative social note | P2 |
 | Everyone ready — `r5_everyone_ready` | The final required player becomes ready | 430 ms | Resolve individual readiness into transition | P3 |
 | Final results, cooperative — `r5_final_results_coop` | Cooperative session result is shown | 1,520 ms | Five notes converge into a shared open chord | P4 |
-| Final results, versus — `r5_final_results_versus` | Competitive winner result is shown | 1,560 ms | Same five-note motif, then a clear high-card crown | P4 |
 | Error — `r5_error_01..02` | A user action fails and a visible message explains why | 170 ms | Rounded wooden refusal; clear, never punitive | P3 |
 | Connection lost — `r5_connection_lost` | Connection crosses the product's confirmed-offline threshold | 420 ms | Suspended airy uncertainty without an alarm | P3 |
 | Reconnected — `r5_reconnect_success` | State is resynchronized and interaction is safe again | 340 ms | Warm open-fifth resolution | P3 |

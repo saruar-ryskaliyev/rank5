@@ -59,13 +59,11 @@ func main() {
 	base := envOr("BASE_URL", "http://127.0.0.1:8080")
 	log.Printf("=== COOP ===")
 	runCoop(base)
-	log.Printf("=== VERSUS ===")
-	runVersus(base)
 	log.Printf("=== MULTI-DECK ===")
 	runMultiDeck(base)
 	log.Printf("=== DISCONNECT LIFECYCLE ===")
 	runDisconnectLifecycle(base)
-	fmt.Println("E2E PASS (skip + coop + versus + multi-deck + disconnect/reconnect/leave)")
+	fmt.Println("E2E PASS (skip + team scoring + multi-deck + disconnect/reconnect/leave)")
 }
 
 func runDisconnectLifecycle(base string) {
@@ -240,76 +238,6 @@ func runCoop(base string) {
 	}
 	_ = gw
 	log.Printf("coop ok")
-}
-
-func runVersus(base string) {
-	code := mustCreate(base)
-	a, b, c := mustDial(base, code), mustDial(base, code), mustDial(base, code)
-	wa := join(a, "A")
-	wb := join(b, "B")
-	wc := join(c, "C")
-	drain(a)
-	drain(b)
-	drain(c)
-	mustSend(a, "start_game", map[string]any{"mode": "versus", "deckId": "movies", "rounds": 1})
-	st := waitPhase(a, "ROUND_SUBMIT", 3*time.Second)
-	_ = waitPhase(b, "ROUND_SUBMIT", 3*time.Second)
-	_ = waitPhase(c, "ROUND_SUBMIT", 3*time.Second)
-	opts := st.CurrentRound.Question.Options
-	subjectID := st.CurrentRound.SubjectID
-
-	clients := map[string]*websocket.Conn{wa.PlayerID: a, wb.PlayerID: b, wc.PlayerID: c}
-	rev := reverse(opts)
-
-	// Everyone submits in ROUND_SUBMIT.
-	for id, conn := range clients {
-		ranking := opts
-		if id != subjectID {
-			// First non-subject gets perfect, second gets reverse — assign below.
-		}
-		_ = ranking
-		_ = conn
-	}
-	var predictors []*websocket.Conn
-	for id, conn := range clients {
-		if id == subjectID {
-			mustSend(conn, "submit_ranking", rankingPayload(st, opts))
-		} else {
-			predictors = append(predictors, conn)
-		}
-	}
-	mustSend(predictors[0], "submit_ranking", rankingPayload(st, opts))
-	mustSend(predictors[1], "submit_ranking", rankingPayload(st, rev))
-
-	reveal := waitPhase(a, "ROUND_REVEAL", 3*time.Second)
-	_ = reveal
-	for _, conn := range []*websocket.Conn{a, b, c} {
-		mustSend(conn, "ready", map[string]any{})
-	}
-	over := waitPhase(a, "GAME_OVER", 3*time.Second)
-	var scores []int
-	for _, p := range over.Players {
-		if p.ID != subjectID {
-			scores = append(scores, p.Score)
-		}
-	}
-	if len(scores) != 2 {
-		log.Fatalf("expected 2 scorers, got %v", over.Players)
-	}
-	// Perfect = 2000, reverse = 1400 → sum 3400
-	sum := scores[0] + scores[1]
-	if sum != 3400 {
-		log.Fatalf("versus scores should be 2000+1400, got %v (sum=%d)", scores, sum)
-	}
-	log.Printf("versus ok scores=%v", scores)
-}
-
-func reverse(in []string) []string {
-	out := make([]string, len(in))
-	for i := range in {
-		out[i] = in[len(in)-1-i]
-	}
-	return out
 }
 
 func rankingPayload(state roomState, ranking []string) map[string]any {

@@ -419,7 +419,7 @@ private fun SoundEventObserver(state: UiState, soundPlayer: Rank5SoundPlayer) {
             soundPlayer.playGameStart()
         }
         if (state.screen == Screen.Results && before.screen != Screen.Results) {
-            soundPlayer.playFinalResults(room?.mode.orEmpty())
+            soundPlayer.playFinalResults()
         }
 
         previous = state
@@ -463,10 +463,6 @@ private fun GameFlow(
                 onRemoveDeck = { id ->
                     if (state.selectedDecks.size > 1) soundPlayer.playSelectionTick()
                     gameVm.removeDeck(id)
-                },
-                onSelectMode = { mode ->
-                    if (state.selectedMode != mode) soundPlayer.playSelectionTick()
-                    gameVm.selectMode(mode)
                 },
                 onSelectRounds = { rounds ->
                     if (state.selectedRounds != rounds) soundPlayer.playSelectionTick()

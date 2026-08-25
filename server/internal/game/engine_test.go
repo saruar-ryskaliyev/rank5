@@ -153,7 +153,7 @@ func TestReadyGating(t *testing.T) {
 	}
 }
 
-func TestVersusScoring(t *testing.T) {
+func TestUnsupportedModeRejected(t *testing.T) {
 	s := NewState("ABCD")
 	s.Players = []*Player{
 		{ID: "p1", Nickname: "Alice", IsHost: true, Connected: true},
@@ -164,20 +164,8 @@ func TestVersusScoring(t *testing.T) {
 		ID: "q1", Prompt: "Q?",
 		Options: []string{"A", "B", "C", "D", "E"},
 	}}
-	if err := s.StartGame("p1", ModeVersus, []string{"test"}, 1, qs, nil); err != nil {
-		t.Fatal(err)
-	}
-	_ = s.SubmitEntry("p1", []string{"A", "B", "C", "D", "E"})
-	_ = s.SubmitEntry("p2", []string{"A", "B", "C", "D", "E"})
-	_ = s.SubmitEntry("p3", []string{"E", "D", "C", "B", "A"})
-	if s.Phase != PhaseRoundReveal {
-		t.Fatalf("phase %s", s.Phase)
-	}
-	if s.PlayerByID("p2").Score != 2000 {
-		t.Fatalf("p2 score %d", s.PlayerByID("p2").Score)
-	}
-	if s.PlayerByID("p3").Score != 1400 {
-		t.Fatalf("p3 score %d want 1400", s.PlayerByID("p3").Score)
+	if err := s.StartGame("p1", Mode("versus"), []string{"test"}, 1, qs, nil); err != ErrInvalidMode {
+		t.Fatalf("StartGame mode error = %v, want %v", err, ErrInvalidMode)
 	}
 }
 

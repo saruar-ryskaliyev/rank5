@@ -24,7 +24,6 @@ object ResultShareManager {
     private const val ROOMY_RADIUS = 60f
     private const val COMPACT_RADIUS = 36f
     private const val HERO_TEXT = 108f
-    private const val TITLE_TEXT = 68f
     private const val HEADING_TEXT = 54f
     private const val BODY_TEXT = 34f
     private const val LABEL_TEXT = 30f
@@ -38,7 +37,6 @@ object ResultShareManager {
     private val muted = Color.rgb(98, 95, 107)
     private val violet = Color.rgb(90, 63, 214)
     private val rose = Color.rgb(179, 38, 75)
-    private val roseContainer = Color.rgb(249, 220, 228)
 
     suspend fun share(context: Context, data: ResultCardData) {
         val uri = withContext(Dispatchers.IO) {
@@ -98,17 +96,13 @@ object ResultShareManager {
             canvas.drawText(ellipsize(data.deckNames.joinToString(" · "), paint, 830f), 120f, 278f, paint)
         }
         canvas.drawText(
-            "${if (data.mode == "coop") "CO-OP" else "VERSUS"}  ·  ${data.rounds} ROUNDS",
+            "${data.rounds} ROUNDS",
             120f,
             if (data.deckNames.size > 1) 326f else 286f,
             paint,
         )
 
-        if (data.mode == "coop") {
-            drawCoop(canvas, paint, data)
-        } else {
-            drawVersus(canvas, paint, data)
-        }
+        drawCoop(canvas, paint, data)
 
         paint.color = muted
         paint.textSize = LABEL_TEXT
@@ -148,37 +142,6 @@ object ResultShareManager {
             canvas.drawText("${formatNumber(score)} pts", 866f, y, paint)
             paint.textAlign = Paint.Align.LEFT
             y += 92f
-        }
-    }
-
-    private fun drawVersus(canvas: Canvas, paint: Paint, data: ResultCardData) {
-        val winner = data.standings.firstOrNull()
-        paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        paint.color = ink
-        paint.textSize = TITLE_TEXT
-        canvas.drawText("${ellipsize(winner?.nickname ?: "Winner", paint, 760f)} wins", 120f, 420f, paint)
-
-        var y = 540f
-        data.standings.forEach { standing ->
-            paint.color = if (standing.rank == 1) roseContainer else surfaceVariant
-            canvas.drawRoundRect(RectF(120f, y - 58f, 900f, y + 38f), COMPACT_RADIUS, COMPACT_RADIUS, paint)
-            paint.color = ink
-            paint.textSize = BODY_TEXT
-            paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            canvas.drawText("${standing.rank}", 154f, y, paint)
-            val name = ellipsize(standing.nickname, paint, 430f)
-            canvas.drawText(name, 220f, y, paint)
-            paint.color = rose
-            paint.textAlign = Paint.Align.RIGHT
-            canvas.drawText("${formatNumber(standing.score)} pts", 866f, y, paint)
-            paint.textAlign = Paint.Align.LEFT
-            y += 116f
-        }
-        if (data.morePlayers > 0) {
-            paint.color = muted
-            paint.textSize = LABEL_TEXT
-            paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            canvas.drawText("+${data.morePlayers} more players", 120f, y + 12f, paint)
         }
     }
 

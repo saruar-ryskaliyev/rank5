@@ -187,14 +187,12 @@ fun RevealScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        if (room.mode == "coop") {
-            Spacer(Modifier.height(Spacing.md))
-            Text(
-                text = "Team this round: ${formatPts(round.teamScore)} · " +
-                    "Game total: ${formatPts(room.teamScore)}",
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
+        Spacer(Modifier.height(Spacing.md))
+        Text(
+            text = "Team this round: ${formatPts(round.teamScore)} · " +
+                "Game total: ${formatPts(room.teamScore)}",
+            style = MaterialTheme.typography.titleMedium,
+        )
 
         Spacer(Modifier.height(Spacing.md))
         SectionLabel("READY $readyCount/${connected.size}")

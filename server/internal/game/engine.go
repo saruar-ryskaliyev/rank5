@@ -48,7 +48,7 @@ func (s *State) UpdateSettings(hostID string, mode Mode, deckIDs []string, total
 	if host == nil || host.ID != hostID {
 		return ErrNotHost
 	}
-	if mode != ModeCoop && mode != ModeVersus {
+	if mode != ModeCoop {
 		return ErrInvalidMode
 	}
 	if totalRounds < 1 || totalRounds > 20 {
@@ -181,7 +181,7 @@ func (s *State) StartGame(hostID string, mode Mode, deckIDs []string, totalRound
 	if s.ConnectedCount() < 2 {
 		return ErrNotEnoughPlayers
 	}
-	if mode != ModeCoop && mode != ModeVersus {
+	if mode != ModeCoop {
 		return ErrInvalidMode
 	}
 	if totalRounds < 1 || totalRounds > 20 {
@@ -465,18 +465,11 @@ func (s *State) scoreRound() {
 		r.Scores[playerID] = pts
 		total += pts
 		count++
-		if s.Mode == ModeVersus {
-			if p := s.PlayerByID(playerID); p != nil {
-				p.Score += pts
-			}
-		}
 	}
 	if count > 0 {
 		r.TeamScore = total / count
 	}
-	if s.Mode == ModeCoop {
-		s.TeamScore += r.TeamScore
-	}
+	s.TeamScore += r.TeamScore
 }
 
 // ForceSubmitDeadline fills missing submissions with the default option order,

@@ -87,7 +87,6 @@ fun LobbyScreen(
     snackbarHostState: SnackbarHostState,
     onSelectDeck: (String) -> Unit,
     onRemoveDeck: (String) -> Unit,
-    onSelectMode: (String) -> Unit,
     onSelectRounds: (Int) -> Unit,
     onLoadDeckLibrary: () -> Unit,
     onCommunityQuery: (String) -> Unit,
@@ -178,13 +177,11 @@ fun LobbyScreen(
 
         if (state.isHost) {
             HostSettings(
-                mode = state.selectedMode,
                 selected = state.selectedDecks,
                 rounds = state.selectedRounds,
                 options = options,
                 query = state.communityQuery,
                 loading = state.communityLoading,
-                onSelectMode = onSelectMode,
                 onToggleRoomDeck = onSelectDeck,
                 onRemoveDeck = onRemoveDeck,
                 onSelectRounds = onSelectRounds,
@@ -193,7 +190,6 @@ fun LobbyScreen(
             )
         } else {
             GuestSettingsSummary(
-                mode = room.mode,
                 decks = room.canonicalSelectedDecks(),
                 rounds = room.totalRounds,
             )
@@ -284,13 +280,11 @@ fun lobbyDeckOptions(
 
 @Composable
 private fun HostSettings(
-    mode: String,
     selected: List<DeckInfo>,
     rounds: Int,
     options: List<LobbyDeckOption>,
     query: String,
     loading: Boolean,
-    onSelectMode: (String) -> Unit,
     onToggleRoomDeck: (String) -> Unit,
     onRemoveDeck: (String) -> Unit,
     onSelectRounds: (Int) -> Unit,
@@ -298,19 +292,6 @@ private fun HostSettings(
     onPickCommunityDeck: (DeckSummary) -> Unit,
 ) {
     var pickerOpen by rememberSaveable { mutableStateOf(false) }
-    SectionLabel("MODE")
-    Spacer(Modifier.height(Spacing.sm))
-    val modes = listOf("coop" to "Team up", "versus" to "Compete")
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        modes.forEachIndexed { index, (value, label) ->
-            SegmentedButton(
-                selected = mode == value,
-                onClick = { onSelectMode(value) },
-                shape = SegmentedButtonDefaults.itemShape(index, modes.size),
-            ) { Text(label) }
-        }
-    }
-    Spacer(Modifier.height(Spacing.md))
     SectionLabel("DECK MIX")
     Spacer(Modifier.height(Spacing.sm))
     SelectedDeckList(selected, onRemoveDeck)
@@ -490,7 +471,7 @@ private fun DeckPickerSheet(
 }
 
 @Composable
-private fun GuestSettingsSummary(mode: String, decks: List<DeckInfo>, rounds: Int) {
+private fun GuestSettingsSummary(decks: List<DeckInfo>, rounds: Int) {
     SectionLabel("GAME SETUP")
     Spacer(Modifier.height(Spacing.sm))
     Surface(
@@ -499,10 +480,6 @@ private fun GuestSettingsSummary(mode: String, decks: List<DeckInfo>, rounds: In
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            Text(
-                if (mode == "versus") "Compete for the high score" else "Team up for one score",
-                style = MaterialTheme.typography.titleMedium,
-            )
             Text(
                 guestSetupLabel(decks, rounds),
                 style = MaterialTheme.typography.titleMedium,

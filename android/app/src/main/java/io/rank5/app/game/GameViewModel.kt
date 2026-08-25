@@ -51,7 +51,6 @@ data class UiState(
     val selectedDecks: List<DeckInfo> = listOf(
         DeckInfo("food", "Food Favorites", "🍕", 6),
     ),
-    val selectedMode: String = "coop",
     val selectedRounds: Int = 5,
     val communityQuery: String = "",
     val communityResults: List<DeckSummary> = emptyList(),
@@ -138,14 +137,12 @@ class GameViewModel(
             .let(::decodeDeckSelection)
         return UiState(
             selectedDecks = restoredDecks.ifEmpty { UiState().selectedDecks },
-            selectedMode = savedStateHandle["selected_mode"] ?: "coop",
             selectedRounds = savedStateHandle["selected_rounds"] ?: 5,
         )
     }
 
     private fun persistSettings(state: UiState = _state.value) {
         savedStateHandle["selected_decks"] = encodeDeckSelection(state.selectedDecks, json)
-        savedStateHandle["selected_mode"] = state.selectedMode
         savedStateHandle["selected_rounds"] = state.selectedRounds
     }
 
@@ -252,11 +249,6 @@ class GameViewModel(
             selectedRounds = clampRounds(st.selectedRounds, deck.questions.size),
         )
     }.also { persistSettings() }
-    fun selectMode(mode: String) {
-        _state.update { it.copy(selectedMode = mode) }
-        persistSettings()
-        syncSettings()
-    }
     fun selectRounds(n: Int) {
         _state.update { it.copy(selectedRounds = clampRounds(n, combinedQuestionCount(it.selectedDecks))) }
         persistSettings()
@@ -343,7 +335,6 @@ class GameViewModel(
         val s = _state.value
         _state.update { it.copy(busyAction = BusyAction.Start) }
         client.startGame(
-            s.selectedMode,
             s.selectedDecks.map { it.id },
             s.selectedRounds,
         )
@@ -354,7 +345,6 @@ class GameViewModel(
         val phase = state.room?.phase
         if (!state.isHost || (phase != Phase.LOBBY && phase != Phase.GAME_OVER)) return
         client.updateGameSettings(
-            state.selectedMode,
             state.selectedDecks.map { it.id },
             state.selectedRounds,
         )
@@ -435,7 +425,6 @@ class GameViewModel(
             awaitingInitialSettings = true
             val state = _state.value
             client.updateGameSettings(
-                state.selectedMode,
                 state.selectedDecks.map { it.id },
                 state.selectedRounds,
             )
@@ -474,8 +463,7 @@ class GameViewModel(
 
         _state.update { st ->
             val serverDecks = room.canonicalSelectedDecks()
-            val serverMatchesPending = room.mode == st.selectedMode &&
-                room.totalRounds == st.selectedRounds &&
+            val serverMatchesPending = room.totalRounds == st.selectedRounds &&
                 room.canonicalDeckIds() == st.selectedDecks.map { it.id }
             val preservePending = st.isHost && awaitingInitialSettings && !serverMatchesPending
             if (serverMatchesPending) awaitingInitialSettings = false
@@ -492,7 +480,6 @@ class GameViewModel(
                 screen = screen,
                 localRanking = ranking,
                 selectedDecks = effectiveDecks,
-                selectedMode = if (preservePending) st.selectedMode else room.mode,
                 selectedRounds = clampRounds(
                     if (preservePending) st.selectedRounds else room.totalRounds,
                     combinedQuestionCount(effectiveDecks),

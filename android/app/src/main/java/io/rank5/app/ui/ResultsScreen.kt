@@ -28,11 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import io.rank5.app.game.BusyAction
 import io.rank5.app.game.UiState
-import io.rank5.app.net.PlayerView
 import io.rank5.app.net.canonicalSelectedDecks
 import androidx.compose.ui.res.stringResource
 import io.rank5.app.R
@@ -42,7 +40,6 @@ import io.rank5.app.ui.components.ConfettiBurst
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.InfoBanner
-import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.RankBadge
 import io.rank5.app.ui.components.SecondaryCta
@@ -122,18 +119,13 @@ fun ResultsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(Modifier.height(Spacing.md))
-                val winner = room.players.maxByOrNull { it.score }
                 Text(
-                    if (room.mode == "coop") "That’s the game" else "${winner?.nickname ?: "Winner"} takes it",
+                    "That’s the game",
                     style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(Spacing.md))
-                if (room.mode == "coop") {
-                    CoopResults(state = state)
-                } else {
-                    VersusPodium(players = room.players)
-                }
+                CoopResults(state = state)
                 if (state.roundHistory.isNotEmpty()) {
                     Spacer(Modifier.height(Spacing.md))
                     DeckMixSummary(room.canonicalSelectedDecks())
@@ -214,8 +206,7 @@ private fun ShareResultCard(data: ResultCardData, onShare: () -> Unit) {
                 DeckIconTile(data.deckEmoji, data.deckName)
                 Spacer(Modifier.width(Spacing.md))
                 Text(
-                    if (data.mode == "coop") "${data.deckName} · ${formatPts(data.teamScore)} team points"
-                    else "${data.deckName} · ${data.standings.firstOrNull()?.nickname ?: "Winner"} takes first",
+                    "${data.deckName} · ${formatPts(data.teamScore)} team points",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -257,8 +248,7 @@ private fun RoundBreakdown(state: UiState) {
                     }
                 }
                 Text(
-                    if (room.mode == "coop") formatPts(round.teamScore)
-                    else formatPts(round.scores.values.maxOrNull() ?: 0),
+                    formatPts(round.teamScore),
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
@@ -354,42 +344,6 @@ private fun CoopResults(state: UiState) {
                         ),
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun VersusPodium(players: List<PlayerView>) {
-    val extras = LocalRank5Extras.current
-    val standings = players.sortedByDescending { it.score }
-    standings.forEachIndexed { i, p ->
-        val winner = i == 0
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = Spacing.sm),
-            shape = MaterialTheme.shapes.medium,
-            color = if (winner) extras.highlight else MaterialTheme.colorScheme.surface,
-            border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.md),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RankBadge(rank = i + 1)
-                Spacer(Modifier.width(Spacing.md))
-                PlayerChip(
-                    name = p.nickname,
-                    colorSeed = p.id,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(Spacing.md))
-                Text(
-                    text = "${formatPts(p.score)} pts",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (winner) extras.onHighlight else extras.accentText,
-                )
             }
         }
     }

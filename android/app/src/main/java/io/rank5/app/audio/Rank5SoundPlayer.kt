@@ -96,7 +96,6 @@ class Rank5SoundPlayer(context: Context) {
             .forEach { sample(it, 120, P2, SOCIAL_GAIN) }
         sample(R.raw.r5_everyone_ready, 430, P3, OUTCOME_GAIN)
         sample(R.raw.r5_final_results_coop, 1_520, P4, PHASE_GAIN)
-        sample(R.raw.r5_final_results_versus, 1_560, P4, PHASE_GAIN)
         listOf(R.raw.r5_error_01, R.raw.r5_error_02)
             .forEach { sample(it, 170, P3, OUTCOME_GAIN) }
         sample(R.raw.r5_connection_lost, 420, P3, OUTCOME_GAIN)
@@ -265,8 +264,8 @@ class Rank5SoundPlayer(context: Context) {
         accessibilitySensitive = true,
     )
     fun playEveryoneReady() = play(R.raw.r5_everyone_ready, "everyone_ready", 500)
-    fun playFinalResults(mode: String) = play(
-        if (mode == "versus") R.raw.r5_final_results_versus else R.raw.r5_final_results_coop,
+    fun playFinalResults() = play(
+        R.raw.r5_final_results_coop,
         "final_results",
         2_000,
     )

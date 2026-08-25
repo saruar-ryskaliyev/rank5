@@ -162,20 +162,18 @@ class GameClient(
     }
 
     fun startGame(
-        mode: String,
         deckIds: List<String>,
         rounds: Int,
     ) {
         scope.launch {
             sendTyped(
                 MsgType.START_GAME,
-                StartGamePayload(mode, deckIds, rounds = rounds),
+                StartGamePayload(deckIds = deckIds, rounds = rounds),
             )
         }
     }
 
     fun updateGameSettings(
-        mode: String,
         deckIds: List<String>,
         rounds: Int,
     ) {
@@ -183,8 +181,7 @@ class GameClient(
             sendTyped(
                 MsgType.UPDATE_GAME_SETTINGS,
                 UpdateGameSettingsPayload(
-                    mode,
-                    deckIds,
+                    deckIds = deckIds,
                     rounds = rounds,
                 ),
             )
