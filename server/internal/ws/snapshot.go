@@ -39,8 +39,6 @@ type RoomStateView struct {
 	DeckIDs       []string        `json:"deckIds"`
 	SelectedDecks []game.DeckInfo `json:"selectedDecks"`
 	TotalRounds   int             `json:"totalRounds"`
-	MusicTrack    string          `json:"musicTrack,omitempty"`
-	MusicScope    string          `json:"musicScope"`
 	Players       []PlayerView    `json:"players"`
 	CurrentRound  *RoundView      `json:"currentRound,omitempty"`
 	TeamScore     int             `json:"teamScore"`
@@ -65,7 +63,6 @@ func snapshotFor(s *game.State, viewerID string, available []game.DeckInfo) Room
 		DeckIDs:       append([]string(nil), s.DeckIDs...),
 		SelectedDecks: append([]game.DeckInfo(nil), s.SelectedDecks...),
 		TotalRounds:   s.TotalRounds, Players: players, TeamScore: s.TeamScore,
-		MusicTrack: s.MusicTrack, MusicScope: s.MusicScope,
 		YouAre: viewerID, Paused: s.Paused, PauseReason: s.PauseReason,
 		AbortReason: s.AbortReason,
 	}

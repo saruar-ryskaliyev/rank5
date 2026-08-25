@@ -47,12 +47,10 @@ type AttachAccountPayload struct {
 }
 
 type StartGamePayload struct {
-	Mode       string   `json:"mode"`
-	DeckIDs    []string `json:"deckIds,omitempty"`
-	DeckID     string   `json:"deckId,omitempty"`
-	Rounds     int      `json:"rounds"`
-	MusicTrack string   `json:"musicTrack,omitempty"`
-	MusicScope string   `json:"musicScope,omitempty"`
+	Mode    string   `json:"mode"`
+	DeckIDs []string `json:"deckIds,omitempty"`
+	DeckID  string   `json:"deckId,omitempty"`
+	Rounds  int      `json:"rounds"`
 }
 
 type UpdateGameSettingsPayload = StartGamePayload

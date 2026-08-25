@@ -53,8 +53,6 @@ data class UiState(
     ),
     val selectedMode: String = "coop",
     val selectedRounds: Int = 5,
-    val selectedMusicTrack: String = "",
-    val selectedMusicScope: String = "lobby_and_game",
     val communityQuery: String = "",
     val communityResults: List<DeckSummary> = emptyList(),
     val communityLoading: Boolean = false,
@@ -142,8 +140,6 @@ class GameViewModel(
             selectedDecks = restoredDecks.ifEmpty { UiState().selectedDecks },
             selectedMode = savedStateHandle["selected_mode"] ?: "coop",
             selectedRounds = savedStateHandle["selected_rounds"] ?: 5,
-            selectedMusicTrack = savedStateHandle["selected_music_track"] ?: "",
-            selectedMusicScope = savedStateHandle["selected_music_scope"] ?: "lobby_and_game",
         )
     }
 
@@ -151,8 +147,6 @@ class GameViewModel(
         savedStateHandle["selected_decks"] = encodeDeckSelection(state.selectedDecks, json)
         savedStateHandle["selected_mode"] = state.selectedMode
         savedStateHandle["selected_rounds"] = state.selectedRounds
-        savedStateHandle["selected_music_track"] = state.selectedMusicTrack
-        savedStateHandle["selected_music_scope"] = state.selectedMusicScope
     }
 
     init {
@@ -269,18 +263,6 @@ class GameViewModel(
         syncSettings()
     }
 
-    fun selectMusicTrack(track: String) {
-        _state.update { it.copy(selectedMusicTrack = track) }
-        persistSettings()
-        syncSettings()
-    }
-
-    fun selectMusicScope(scope: String) {
-        _state.update { it.copy(selectedMusicScope = scope) }
-        persistSettings()
-        syncSettings()
-    }
-
     fun loadDeckLibrary() {
         searchCommunityDecks(_state.value.communityQuery)
     }
@@ -364,8 +346,6 @@ class GameViewModel(
             s.selectedMode,
             s.selectedDecks.map { it.id },
             s.selectedRounds,
-            s.selectedMusicTrack,
-            s.selectedMusicScope,
         )
     }
 
@@ -377,8 +357,6 @@ class GameViewModel(
             state.selectedMode,
             state.selectedDecks.map { it.id },
             state.selectedRounds,
-            state.selectedMusicTrack,
-            state.selectedMusicScope,
         )
     }
 
@@ -460,8 +438,6 @@ class GameViewModel(
                 state.selectedMode,
                 state.selectedDecks.map { it.id },
                 state.selectedRounds,
-                state.selectedMusicTrack,
-                state.selectedMusicScope,
             )
         }
     }
@@ -500,9 +476,7 @@ class GameViewModel(
             val serverDecks = room.canonicalSelectedDecks()
             val serverMatchesPending = room.mode == st.selectedMode &&
                 room.totalRounds == st.selectedRounds &&
-                room.canonicalDeckIds() == st.selectedDecks.map { it.id } &&
-                room.musicTrack == st.selectedMusicTrack &&
-                room.musicScope == st.selectedMusicScope
+                room.canonicalDeckIds() == st.selectedDecks.map { it.id }
             val preservePending = st.isHost && awaitingInitialSettings && !serverMatchesPending
             if (serverMatchesPending) awaitingInitialSettings = false
             val effectiveDecks = if (preservePending) st.selectedDecks else serverDecks.ifEmpty { st.selectedDecks }
@@ -519,8 +493,6 @@ class GameViewModel(
                 localRanking = ranking,
                 selectedDecks = effectiveDecks,
                 selectedMode = if (preservePending) st.selectedMode else room.mode,
-                selectedMusicTrack = if (preservePending) st.selectedMusicTrack else room.musicTrack,
-                selectedMusicScope = if (preservePending) st.selectedMusicScope else room.musicScope,
                 selectedRounds = clampRounds(
                     if (preservePending) st.selectedRounds else room.totalRounds,
                     combinedQuestionCount(effectiveDecks),

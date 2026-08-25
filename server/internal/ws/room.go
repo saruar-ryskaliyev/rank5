@@ -392,11 +392,6 @@ func (r *Room) handleMessage(ev roomEvent) {
 			r.sendError(slot, "invalid start_game")
 			return
 		}
-		musicTrack, musicScope, err := game.ValidateMusicSettings(p.MusicTrack, p.MusicScope)
-		if err != nil {
-			r.sendError(slot, err.Error())
-			return
-		}
 		deckIDs := p.CanonicalDeckIDs()
 		resolved, infos, err := r.resolveDecks(deckIDs, slot.playerID)
 		if err != nil {
@@ -412,8 +407,6 @@ func (r *Room) handleMessage(ev roomEvent) {
 			r.sendError(slot, err.Error())
 			return
 		}
-		r.state.MusicTrack = musicTrack
-		r.state.MusicScope = musicScope
 		r.activeDecks = append([]game.DeckInfo(nil), infos...)
 		r.savedGame = false
 		r.scheduleDeadline()
@@ -425,11 +418,6 @@ func (r *Room) handleMessage(ev roomEvent) {
 		p, err := DecodePayload[UpdateGameSettingsPayload](env)
 		if err != nil {
 			r.sendError(slot, "invalid game settings")
-			return
-		}
-		musicTrack, musicScope, err := game.ValidateMusicSettings(p.MusicTrack, p.MusicScope)
-		if err != nil {
-			r.sendError(slot, err.Error())
 			return
 		}
 		deckIDs := p.CanonicalDeckIDs()
@@ -450,8 +438,6 @@ func (r *Room) handleMessage(ev roomEvent) {
 			r.sendError(slot, err.Error())
 			return
 		}
-		r.state.MusicTrack = musicTrack
-		r.state.MusicScope = musicScope
 		r.activeDecks = append([]game.DeckInfo(nil), infos...)
 		r.broadcastState()
 	case TypeSubmitRanking, TypeSubmitPrediction:

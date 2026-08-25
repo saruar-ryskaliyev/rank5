@@ -20,15 +20,6 @@ const (
 	ModeVersus Mode = "versus"
 )
 
-const (
-	MusicTrackFiveAlive        = "five_alive"
-	MusicTrackDancehallShuffle = "dancehall_shuffle"
-	MusicTrackEasyGlow         = "easy_glow"
-	MusicTrackT8Bounce         = "t8_bounce"
-	MusicScopeLobby            = "lobby"
-	MusicScopeLobbyAndGame     = "lobby_and_game"
-)
-
 // Phase durations.
 const (
 	SubmitDuration = 60 * time.Second
@@ -99,8 +90,6 @@ type State struct {
 	DeckIDs        []string   `json:"deckIds"`
 	SelectedDecks  []DeckInfo `json:"selectedDecks"`
 	TotalRounds    int        `json:"totalRounds"`
-	MusicTrack     string     `json:"musicTrack,omitempty"`
-	MusicScope     string     `json:"musicScope"`
 	Players        []*Player  `json:"players"`
 	CurrentRound   *Round     `json:"currentRound,omitempty"`
 	TeamScore      int        `json:"teamScore"`

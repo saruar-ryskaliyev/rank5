@@ -68,8 +68,6 @@ fun ProfileScreen(
     onRetryStats: () -> Unit = {},
     onGameSoundsEnabled: (Boolean) -> Unit = {},
     onGameSoundsVolume: (Float) -> Unit = {},
-    onMusicEnabled: (Boolean) -> Unit = {},
-    onMusicVolume: (Float) -> Unit = {},
     onAllowInSilentMode: (Boolean) -> Unit = {},
     onPreviewSound: () -> Unit = {},
     onAppear: () -> Unit = {},
@@ -146,8 +144,6 @@ fun ProfileScreen(
             settings = audioSettings,
             onGameSoundsEnabled = onGameSoundsEnabled,
             onGameSoundsVolume = onGameSoundsVolume,
-            onMusicEnabled = onMusicEnabled,
-            onMusicVolume = onMusicVolume,
             onAllowInSilentMode = onAllowInSilentMode,
             onPreviewSound = onPreviewSound,
         )
@@ -284,8 +280,6 @@ private fun AudioSettingsSection(
     settings: AudioSettings,
     onGameSoundsEnabled: (Boolean) -> Unit,
     onGameSoundsVolume: (Float) -> Unit,
-    onMusicEnabled: (Boolean) -> Unit,
-    onMusicVolume: (Float) -> Unit,
     onAllowInSilentMode: (Boolean) -> Unit,
     onPreviewSound: () -> Unit,
 ) {
@@ -319,27 +313,6 @@ private fun AudioSettingsSection(
                     },
                 )
                 TextButton(onClick = onPreviewSound) { Text("Preview sound") }
-            }
-            Spacer(Modifier.height(Spacing.sm))
-            SettingSwitchRow(
-                title = "Music",
-                supporting = "Play the host’s soundtrack in the lobby and game",
-                checked = settings.musicEnabled,
-                onCheckedChange = onMusicEnabled,
-            )
-            if (settings.musicEnabled) {
-                Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    "Volume ${Math.round(settings.musicVolume * 100)}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Slider(
-                    value = settings.musicVolume,
-                    onValueChange = onMusicVolume,
-                    valueRange = 0f..1f,
-                    modifier = Modifier.semantics { contentDescription = "Music volume" },
-                )
             }
             Spacer(Modifier.height(Spacing.sm))
             SettingSwitchRow(

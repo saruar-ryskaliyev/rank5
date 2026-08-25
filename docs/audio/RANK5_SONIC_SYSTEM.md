@@ -117,13 +117,13 @@ Recommended default game-sounds bus is **70% amplitude** (approximately −3 dB)
 
 ## Android playback and accessibility
 
-- Preload the short OGG files into `SoundPool` before the lobby/game phase. Use mono playback and an `AudioAttributes` category appropriate for game sonification; do not request transient audio focus or duck speech/music for these sub-two-second cues.
-- Honor the in-app **Game sounds** toggle and level. Provide a separate **Music** toggle/level, default music off; this pack intentionally contains no continuous music. Never route a sound through the alarm channel.
+- Preload the short OGG files into `SoundPool` before the lobby/game phase. Use mono playback and an `AudioAttributes` category appropriate for game sonification; do not request transient audio focus for these sub-two-second cues.
+- Honor the in-app **Game sounds** toggle and level. Rank5 intentionally contains no continuous music. Never route a sound through the alarm channel.
 - Respect device silent mode: when the device ringer mode is silent or vibrate, default the Rank5 game-sounds bus to muted for that session unless the player has explicitly chosen to allow game sounds in silent mode.
 - All cues duplicate visual state, text, motion, and/or haptics. No lock, timeout, network, score, or error meaning is audio-only.
 - If TalkBack touch exploration is active, suppress `selection_tick`, `drag_lift`, and `rank_cross` by default; TalkBack speech and the drag haptic remain authoritative. Keep phase-critical cues at the user's selected level only if they do not overlap a spoken announcement; otherwise defer up to 250 ms or drop them when stale.
 - Do not play join/leave or remote-status cues while TalkBack is speaking a newly focused label. Never duck TalkBack.
-- Persist preferences locally and expose them from Settings: `Game sounds` on/off plus level, `Music` on/off plus level, and optional `Allow in silent mode` off by default.
+- Persist preferences locally and expose them from Settings: `Game sounds` on/off plus level and optional `Allow in silent mode` off by default.
 - The same assets serve light and dark themes. Theme-specific EQ or alternate files would weaken recognition without adding useful information, so no theme variants are included.
 
 ## Asset specification and QA targets

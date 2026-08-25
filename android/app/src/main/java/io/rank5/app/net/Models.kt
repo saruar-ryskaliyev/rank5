@@ -33,8 +33,6 @@ data class StartGamePayload(
     val deckIds: List<String>,
     val deckId: String = deckIds.firstOrNull().orEmpty(),
     val rounds: Int,
-    val musicTrack: String = "",
-    val musicScope: String = "lobby_and_game",
 )
 
 typealias UpdateGameSettingsPayload = StartGamePayload
@@ -113,8 +111,6 @@ data class RoomStateView(
     val deckIds: List<String> = emptyList(),
     val selectedDecks: List<DeckInfo> = emptyList(),
     val totalRounds: Int = 5,
-    val musicTrack: String = "",
-    val musicScope: String = "lobby_and_game",
     val players: List<PlayerView> = emptyList(),
     val currentRound: RoundView? = null,
     val teamScore: Int = 0,

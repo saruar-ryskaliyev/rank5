@@ -87,11 +87,6 @@ class MainActivity : ComponentActivity() {
         super.onStop()
     }
 
-    override fun onStart() {
-        super.onStart()
-        soundPlayer.onForeground()
-    }
-
     override fun onDestroy() {
         soundPlayer.release()
         super.onDestroy()

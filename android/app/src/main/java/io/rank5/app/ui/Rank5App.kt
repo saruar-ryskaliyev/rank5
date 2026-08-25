@@ -126,22 +126,6 @@ fun Rank5App(
     LaunchedEffect(state.screen) {
         if (state.screen != Screen.Results) statsVm.clearClaimStatus()
     }
-    LaunchedEffect(
-        state.room?.musicTrack,
-        state.room?.musicScope,
-        state.screen,
-        audioSettings.musicEnabled,
-        audioSettings.musicVolume,
-        audioSettings.allowInSilentMode,
-    ) {
-        val room = state.room
-        soundPlayer.updateMusicState(
-            track = room?.musicTrack.orEmpty(),
-            scope = room?.musicScope.orEmpty(),
-            inRoom = room != null && state.screen != Screen.Home,
-            inLobby = room != null && state.screen == Screen.Lobby,
-        )
-    }
     SoundEventObserver(state = state, soundPlayer = soundPlayer)
 
     var showLeaveDialog by remember { mutableStateOf(false) }
@@ -260,7 +244,6 @@ fun Rank5App(
                     },
                     onRequestLeave = { showLeaveDialog = true },
                     soundPlayer = soundPlayer,
-                    audioSettings = audioSettings,
                 )
                 tab == AppTab.Play -> HomeScreen(
                     state = state,
@@ -313,8 +296,6 @@ fun Rank5App(
                     onRetryStats = statsVm::refresh,
                     onGameSoundsEnabled = soundPlayer::setGameSoundsEnabled,
                     onGameSoundsVolume = soundPlayer::setGameSoundsVolume,
-                    onMusicEnabled = soundPlayer::setMusicEnabled,
-                    onMusicVolume = soundPlayer::setMusicVolume,
                     onAllowInSilentMode = soundPlayer::setAllowInSilentMode,
                     onPreviewSound = soundPlayer::playGameStart,
                     onAppear = {
@@ -441,7 +422,6 @@ private fun GameFlow(
     onShare: () -> Unit,
     onRequestLeave: () -> Unit,
     soundPlayer: Rank5SoundPlayer,
-    audioSettings: io.rank5.app.audio.AudioSettings,
 ) {
     AnimatedContent(
         targetState = state.screen,
@@ -487,17 +467,6 @@ private fun GameFlow(
                 onStart = gameVm::startGame,
                 onLeave = onRequestLeave,
                 onCodeConfirmed = soundPlayer::playCodeConfirmed,
-                musicEnabled = audioSettings.musicEnabled,
-                onMusicEnabled = soundPlayer::setMusicEnabled,
-                onSelectMusicTrack = { track ->
-                    if (state.selectedMusicTrack != track) soundPlayer.playSelectionTick()
-                    if (track.isNotEmpty()) soundPlayer.setMusicEnabled(true)
-                    gameVm.selectMusicTrack(track)
-                },
-                onSelectMusicScope = { musicScope ->
-                    if (state.selectedMusicScope != musicScope) soundPlayer.playSelectionTick()
-                    gameVm.selectMusicScope(musicScope)
-                },
             )
             Screen.Submit -> SubmitScreen(
                 state = state,

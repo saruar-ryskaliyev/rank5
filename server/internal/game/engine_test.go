@@ -6,19 +6,6 @@ import (
 	"time"
 )
 
-func TestValidateMusicSettings(t *testing.T) {
-	track, scope, err := ValidateMusicSettings(MusicTrackEasyGlow, "")
-	if err != nil || track != MusicTrackEasyGlow || scope != MusicScopeLobbyAndGame {
-		t.Fatalf("expected valid track with default scope, got track=%q scope=%q err=%v", track, scope, err)
-	}
-	if _, _, err := ValidateMusicSettings("unknown", MusicScopeLobby); err == nil {
-		t.Fatal("expected unknown track to fail validation")
-	}
-	if _, _, err := ValidateMusicSettings("", "everywhere"); err == nil {
-		t.Fatal("expected unknown scope to fail validation")
-	}
-}
-
 func TestDisplacementPerfect(t *testing.T) {
 	a := []string{"A", "B", "C", "D", "E"}
 	if d := Displacement(a, a); d != 0 {

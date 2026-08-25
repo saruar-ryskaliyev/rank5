@@ -165,13 +165,11 @@ class GameClient(
         mode: String,
         deckIds: List<String>,
         rounds: Int,
-        musicTrack: String,
-        musicScope: String,
     ) {
         scope.launch {
             sendTyped(
                 MsgType.START_GAME,
-                StartGamePayload(mode, deckIds, rounds = rounds, musicTrack = musicTrack, musicScope = musicScope),
+                StartGamePayload(mode, deckIds, rounds = rounds),
             )
         }
     }
@@ -180,8 +178,6 @@ class GameClient(
         mode: String,
         deckIds: List<String>,
         rounds: Int,
-        musicTrack: String,
-        musicScope: String,
     ) {
         scope.launch {
             sendTyped(
@@ -190,8 +186,6 @@ class GameClient(
                     mode,
                     deckIds,
                     rounds = rounds,
-                    musicTrack = musicTrack,
-                    musicScope = musicScope,
                 ),
             )
         }

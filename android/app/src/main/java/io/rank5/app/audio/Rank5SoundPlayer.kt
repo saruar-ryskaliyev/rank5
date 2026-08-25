@@ -1,19 +1,12 @@
 package io.rank5.app.audio
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.SoundPool
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
-import androidx.core.content.ContextCompat
 import io.rank5.app.BuildConfig
 import io.rank5.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +17,6 @@ import kotlin.random.Random
 data class AudioSettings(
     val gameSoundsEnabled: Boolean = true,
     val gameSoundsVolume: Float = 0.7f,
-    val musicEnabled: Boolean = false,
-    val musicVolume: Float = 0.5f,
     val allowInSilentMode: Boolean = false,
 )
 
@@ -40,7 +31,6 @@ class Rank5SoundPlayer(context: Context) {
     private val audioManager = appContext.getSystemService(AudioManager::class.java)
     private val accessibilityManager =
         appContext.getSystemService(AccessibilityManager::class.java)
-    private val mainHandler = Handler(Looper.getMainLooper())
 
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<AudioSettings> = _settings.asStateFlow()
@@ -119,36 +109,6 @@ class Rank5SoundPlayer(context: Context) {
     private val lastPlayedAt = mutableMapOf<String, Long>()
     private val crossingTimes = ArrayDeque<Long>()
     private var released = false
-    private var foreground = true
-    private var desiredMusicTrack = ""
-    private var desiredMusicScope = MusicScopeLobbyAndGame
-    private var desiredMusicInRoom = false
-    private var desiredMusicInLobby = false
-    private var activeMusicTrack = ""
-    private var musicPlayer: MediaPlayer? = null
-    private var musicDuck = 1f
-    private var duckUntilMs = 0L
-
-    private val restoreMusicVolume = object : Runnable {
-        override fun run() {
-            synchronized(this@Rank5SoundPlayer) {
-                val remaining = duckUntilMs - SystemClock.elapsedRealtime()
-                if (remaining > 0) {
-                    mainHandler.postDelayed(this, remaining)
-                } else {
-                    musicDuck = 1f
-                    applyMusicVolume()
-                }
-            }
-        }
-    }
-    private val ringerModeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            reconcileMusic()
-        }
-    }
-    private val touchExplorationListener =
-        AccessibilityManager.TouchExplorationStateChangeListener { reconcileMusic() }
 
     private val joinBag = VariantBag(
         listOf(R.raw.r5_player_join_01, R.raw.r5_player_join_02, R.raw.r5_player_join_03),
@@ -186,13 +146,6 @@ class Rank5SoundPlayer(context: Context) {
         samples.forEach { (resId, sample) ->
             sampleIds[resId] = soundPool.load(appContext, resId, sample.priority)
         }
-        accessibilityManager?.addTouchExplorationStateChangeListener(touchExplorationListener)
-        ContextCompat.registerReceiver(
-            appContext,
-            ringerModeReceiver,
-            IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
     }
 
     fun setGameSoundsEnabled(enabled: Boolean) {
@@ -211,43 +164,13 @@ class Rank5SoundPlayer(context: Context) {
         }
     }
 
-    fun setMusicEnabled(enabled: Boolean) {
-        updateSettings(_settings.value.copy(musicEnabled = enabled))
-        reconcileMusic()
-    }
-
-    fun setMusicVolume(volume: Float) {
-        updateSettings(_settings.value.copy(musicVolume = volume.coerceIn(0f, 1f)))
-        applyMusicVolume()
-        reconcileMusic()
-    }
-
     fun setAllowInSilentMode(allowed: Boolean) {
         updateSettings(_settings.value.copy(allowInSilentMode = allowed))
-        reconcileMusic()
-    }
-
-    /** Updates the host-selected soundtrack without restarting it at phase changes. */
-    @Synchronized
-    fun updateMusicState(track: String, scope: String, inRoom: Boolean, inLobby: Boolean) {
-        desiredMusicTrack = track
-        desiredMusicScope = scope
-        desiredMusicInRoom = inRoom
-        desiredMusicInLobby = inLobby
-        reconcileMusic()
-    }
-
-    @Synchronized
-    fun onForeground() {
-        foreground = true
-        reconcileMusic()
     }
 
     @Synchronized
     fun onBackground() {
-        foreground = false
         stopSoundEffects()
-        stopMusic()
     }
 
     fun playPlayerJoin() = play(joinBag.next(), "player_join", 180, accessibilitySensitive = true)
@@ -409,12 +332,6 @@ class Rank5SoundPlayer(context: Context) {
         if (streamId == 0) return
         lastPlayedAt[eventKey] = now
         active += Active(streamId, sample.priority, sample.gain * talkBackTrim, now + sample.durationMs)
-        if (sample.priority >= P3) {
-            duckMusic(
-                factor = if (sample.priority >= P4) 0.28f else 0.45f,
-                durationMs = sample.durationMs + MUSIC_DUCK_TAIL_MS,
-            )
-        }
         if (BuildConfig.DEBUG) Log.d(TAG, "play $eventKey stream=$streamId")
     }
 
@@ -425,76 +342,10 @@ class Rank5SoundPlayer(context: Context) {
     }
 
     @Synchronized
-    private fun reconcileMusic() {
-        if (released) return
-        val settings = _settings.value
-        val selected = LobbyMusicCatalog.find(desiredMusicTrack)
-        val scopeAllowsPlayback = desiredMusicInLobby ||
-            (desiredMusicInRoom && desiredMusicScope == MusicScopeLobbyAndGame)
-        val deviceAllowsPlayback = settings.musicEnabled && settings.musicVolume > 0f &&
-            (settings.allowInSilentMode || audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL) &&
-            accessibilityManager?.isTouchExplorationEnabled != true
-        if (!foreground || selected == null || !scopeAllowsPlayback || !deviceAllowsPlayback) {
-            stopMusic()
-            return
-        }
-        if (activeMusicTrack == selected.id && musicPlayer != null) {
-            applyMusicVolume()
-            return
-        }
-        stopMusic()
-        musicPlayer = MediaPlayer.create(appContext, selected.resourceId)?.apply {
-            isLooping = true
-            setOnErrorListener { _, what, extra ->
-                if (BuildConfig.DEBUG) Log.w(TAG, "music error what=$what extra=$extra")
-                synchronized(this@Rank5SoundPlayer) { stopMusic() }
-                true
-            }
-        }
-        activeMusicTrack = if (musicPlayer != null) selected.id else ""
-        applyMusicVolume()
-        musicPlayer?.start()
-        if (BuildConfig.DEBUG && activeMusicTrack.isNotEmpty()) {
-            Log.d(TAG, "music start ${selected.id} scope=$desiredMusicScope")
-        }
-    }
-
-    @Synchronized
-    private fun applyMusicVolume() {
-        val volume = (_settings.value.musicVolume * MUSIC_GAIN * musicDuck).coerceIn(0f, 1f)
-        musicPlayer?.setVolume(volume, volume)
-    }
-
-    @Synchronized
-    private fun duckMusic(factor: Float, durationMs: Long) {
-        if (musicPlayer == null) return
-        musicDuck = minOf(musicDuck, factor)
-        duckUntilMs = maxOf(duckUntilMs, SystemClock.elapsedRealtime() + durationMs)
-        applyMusicVolume()
-        mainHandler.removeCallbacks(restoreMusicVolume)
-        mainHandler.postDelayed(restoreMusicVolume, durationMs)
-    }
-
-    @Synchronized
-    private fun stopMusic() {
-        mainHandler.removeCallbacks(restoreMusicVolume)
-        musicDuck = 1f
-        duckUntilMs = 0L
-        musicPlayer?.runCatching { stop() }
-        musicPlayer?.release()
-        musicPlayer = null
-        if (BuildConfig.DEBUG && activeMusicTrack.isNotEmpty()) Log.d(TAG, "music stop $activeMusicTrack")
-        activeMusicTrack = ""
-    }
-
-    @Synchronized
     fun release() {
         if (released) return
         stopSoundEffects()
-        stopMusic()
         released = true
-        accessibilityManager?.removeTouchExplorationStateChangeListener(touchExplorationListener)
-        runCatching { appContext.unregisterReceiver(ringerModeReceiver) }
         soundPool.release()
         loadedSampleIds.clear()
     }
@@ -502,8 +353,6 @@ class Rank5SoundPlayer(context: Context) {
     private fun loadSettings(): AudioSettings = AudioSettings(
         gameSoundsEnabled = preferences.getBoolean(KEY_GAME_SOUNDS, true),
         gameSoundsVolume = preferences.getFloat(KEY_GAME_VOLUME, 0.7f),
-        musicEnabled = preferences.getBoolean(KEY_MUSIC, false),
-        musicVolume = preferences.getFloat(KEY_MUSIC_VOLUME, 0.5f),
         allowInSilentMode = preferences.getBoolean(KEY_ALLOW_SILENT, false),
     )
 
@@ -512,8 +361,6 @@ class Rank5SoundPlayer(context: Context) {
         preferences.edit()
             .putBoolean(KEY_GAME_SOUNDS, value.gameSoundsEnabled)
             .putFloat(KEY_GAME_VOLUME, value.gameSoundsVolume)
-            .putBoolean(KEY_MUSIC, value.musicEnabled)
-            .putFloat(KEY_MUSIC_VOLUME, value.musicVolume)
             .putBoolean(KEY_ALLOW_SILENT, value.allowInSilentMode)
             .apply()
     }
@@ -545,13 +392,9 @@ class Rank5SoundPlayer(context: Context) {
         private const val PREFS_NAME = "rank5_audio"
         private const val KEY_GAME_SOUNDS = "game_sounds"
         private const val KEY_GAME_VOLUME = "game_volume"
-        private const val KEY_MUSIC = "music"
-        private const val KEY_MUSIC_VOLUME = "music_volume"
         private const val KEY_ALLOW_SILENT = "allow_in_silent_mode"
         private const val MAX_STREAMS = 3
         private const val MAX_CROSSINGS_PER_SECOND = 8
-        private const val MUSIC_GAIN = 0.70f
-        private const val MUSIC_DUCK_TAIL_MS = 180L
         private const val P1 = 1
         private const val P2 = 2
         private const val P3 = 3

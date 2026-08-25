@@ -34,25 +34,7 @@ func NewState(code string) *State {
 		DeckID:      "food",
 		DeckIDs:     []string{"food"},
 		TotalRounds: 5,
-		MusicScope:  MusicScopeLobbyAndGame,
 		Players:     []*Player{},
-	}
-}
-
-// ValidateMusicSettings keeps the wire values small and stable. An empty
-// track means Off; missing scope from an older client uses the product default.
-func ValidateMusicSettings(track, scope string) (string, string, error) {
-	if scope == "" {
-		scope = MusicScopeLobbyAndGame
-	}
-	if scope != MusicScopeLobby && scope != MusicScopeLobbyAndGame {
-		return "", "", errors.New("invalid music playback setting")
-	}
-	switch track {
-	case "", MusicTrackFiveAlive, MusicTrackDancehallShuffle, MusicTrackEasyGlow, MusicTrackT8Bounce:
-		return track, scope, nil
-	default:
-		return "", "", errors.New("invalid music track")
 	}
 }
 

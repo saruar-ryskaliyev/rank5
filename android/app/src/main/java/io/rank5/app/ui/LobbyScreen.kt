@@ -32,13 +32,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,10 +63,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.rank5.app.R
-import io.rank5.app.audio.LobbyMusicCatalog
-import io.rank5.app.audio.LobbyMusicTrack
-import io.rank5.app.audio.MusicScopeLobby
-import io.rank5.app.audio.MusicScopeLobbyAndGame
 import io.rank5.app.deck.DeckSummary
 import io.rank5.app.game.BusyAction
 import io.rank5.app.game.MaxSelectedDecks
@@ -103,10 +97,6 @@ fun LobbyScreen(
     onStart: () -> Unit,
     onLeave: () -> Unit,
     onCodeConfirmed: () -> Unit = {},
-    musicEnabled: Boolean = false,
-    onMusicEnabled: (Boolean) -> Unit = {},
-    onSelectMusicTrack: (String) -> Unit = {},
-    onSelectMusicScope: (String) -> Unit = {},
 ) {
     val room = state.room
     if (room == null) {
@@ -202,23 +192,12 @@ fun LobbyScreen(
                 onSelectRounds = onSelectRounds,
                 onQuery = onCommunityQuery,
                 onPickCommunityDeck = onPickCommunityDeck,
-                musicTrack = state.selectedMusicTrack,
-                musicScope = state.selectedMusicScope,
-                musicEnabled = musicEnabled,
-                onMusicEnabled = onMusicEnabled,
-                onSelectMusicTrack = onSelectMusicTrack,
-                onSelectMusicScope = onSelectMusicScope,
             )
         } else {
             GuestSettingsSummary(
                 mode = room.mode,
                 decks = room.canonicalSelectedDecks(),
                 rounds = room.totalRounds,
-            )
-            LobbyMusicPlayback(
-                track = LobbyMusicCatalog.find(room.musicTrack),
-                musicEnabled = musicEnabled,
-                onMusicEnabled = onMusicEnabled,
             )
             Spacer(Modifier.height(Spacing.xl))
             InfoBanner("Waiting for $hostName to start the game")
@@ -319,15 +298,8 @@ private fun HostSettings(
     onSelectRounds: (Int) -> Unit,
     onQuery: (String) -> Unit,
     onPickCommunityDeck: (DeckSummary) -> Unit,
-    musicTrack: String,
-    musicScope: String,
-    musicEnabled: Boolean,
-    onMusicEnabled: (Boolean) -> Unit,
-    onSelectMusicTrack: (String) -> Unit,
-    onSelectMusicScope: (String) -> Unit,
 ) {
     var pickerOpen by rememberSaveable { mutableStateOf(false) }
-    var musicPickerOpen by rememberSaveable { mutableStateOf(false) }
     SectionLabel("MODE")
     Spacer(Modifier.height(Spacing.sm))
     val modes = listOf("coop" to "Team up", "versus" to "Compete")
@@ -383,16 +355,6 @@ private fun HostSettings(
             ) { Text(count.toString()) }
         }
     }
-    Spacer(Modifier.height(Spacing.lg))
-    LobbyMusicControls(
-        selectedTrack = LobbyMusicCatalog.find(musicTrack),
-        musicScope = musicScope,
-        musicEnabled = musicEnabled,
-        onOpenPicker = { musicPickerOpen = true },
-        onMusicEnabled = onMusicEnabled,
-        onSelectMusicScope = onSelectMusicScope,
-    )
-
     if (pickerOpen) {
         DeckPickerSheet(
             options = options,
@@ -406,155 +368,6 @@ private fun HostSettings(
                 else onToggleRoomDeck(option.id)
             },
         )
-    }
-    if (musicPickerOpen) {
-        MusicPickerSheet(
-            selectedId = musicTrack,
-            onDismiss = { musicPickerOpen = false },
-            onSelect = {
-                onSelectMusicTrack(it)
-                musicPickerOpen = false
-            },
-        )
-    }
-}
-
-@Composable
-private fun LobbyMusicControls(
-    selectedTrack: LobbyMusicTrack?,
-    musicScope: String,
-    musicEnabled: Boolean,
-    onOpenPicker: () -> Unit,
-    onMusicEnabled: (Boolean) -> Unit,
-    onSelectMusicScope: (String) -> Unit,
-) {
-    SectionLabel("MUSIC")
-    Spacer(Modifier.height(Spacing.sm))
-    Surface(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenPicker),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        Row(
-            Modifier.padding(Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("♫", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(Spacing.md))
-            Column(Modifier.weight(1f)) {
-                Text(selectedTrack?.name ?: "Off", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    selectedTrack?.let { "${it.originalTitle} · ${it.artist} · ${it.duration}" }
-                        ?: "Choose one of four lobby soundtracks",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text("Change", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-        }
-    }
-    if (selectedTrack != null) {
-        Spacer(Modifier.height(Spacing.sm))
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            val scopes = listOf(MusicScopeLobby to "Lobby only", MusicScopeLobbyAndGame to "Lobby + game")
-            scopes.forEachIndexed { index, (value, label) ->
-                SegmentedButton(
-                    selected = musicScope == value,
-                    onClick = { onSelectMusicScope(value) },
-                    shape = SegmentedButtonDefaults.itemShape(index, scopes.size),
-                ) { Text(label) }
-            }
-        }
-        LobbyMusicPlayback(selectedTrack, musicEnabled, onMusicEnabled)
-    }
-}
-
-@Composable
-private fun LobbyMusicPlayback(
-    track: LobbyMusicTrack?,
-    musicEnabled: Boolean,
-    onMusicEnabled: (Boolean) -> Unit,
-) {
-    if (track == null) return
-    Spacer(Modifier.height(Spacing.sm))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(Modifier.weight(1f).padding(end = Spacing.md)) {
-            Text("Play on this device", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "${track.name} · Your volume setting applies",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Switch(checked = musicEnabled, onCheckedChange = onMusicEnabled)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MusicPickerSheet(
-    selectedId: String,
-    onDismiss: () -> Unit,
-    onSelect: (String) -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
-            Text("Choose music", style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                "The host’s choice is shared with the room. Each player controls playback locally.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(Spacing.md))
-            MusicChoiceRow(
-                title = "Off",
-                supporting = "No background music",
-                selected = selectedId.isEmpty(),
-                onClick = { onSelect("") },
-            )
-            LobbyMusicCatalog.tracks.forEach { track ->
-                HorizontalDivider()
-                MusicChoiceRow(
-                    title = track.name,
-                    supporting = "${track.originalTitle} · ${track.artist} · ${track.duration}",
-                    selected = selectedId == track.id,
-                    onClick = { onSelect(track.id) },
-                )
-            }
-            Spacer(Modifier.height(Spacing.xl))
-        }
-    }
-}
-
-@Composable
-private fun MusicChoiceRow(
-    title: String,
-    supporting: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Spacer(Modifier.width(Spacing.sm))
-        Column {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(
-                supporting,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
     }
 }
 
