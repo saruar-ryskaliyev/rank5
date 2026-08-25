@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -36,13 +36,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.rank5.app.deck.DeckSummary
 import io.rank5.app.deck.DecksUiState
 import io.rank5.app.deck.unifiedDeckLibrary
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
+import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
 enum class DeckFilter { All, Mine, Saved, Community }
@@ -90,12 +90,12 @@ fun DecksListScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         OutlinedTextField(
             value = state.communityQuery,
             onValueChange = onQuery,
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             label = { Text("Search decks") },
             singleLine = true,
         )
@@ -166,18 +166,18 @@ fun DecksListScreen(
                 }
             }
             else -> BoxWithConstraints(Modifier.weight(1f)) {
-                if (maxWidth >= 840.dp) {
-                    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(Spacing.xl)) {
+                if (maxWidth >= Sizes.responsiveBreakpoint) {
+                    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         DeckLibraryList(
                             visible, ownedIds, state.communityLoading, state.communityHasMore,
                             onOpenDeck, onLoadMore, Modifier.weight(1f),
                         )
                         Surface(
-                            modifier = Modifier.width(320.dp),
+                            modifier = Modifier.width(Sizes.sidebar),
                             color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = MaterialTheme.shapes.large,
                         ) {
-                            Column(Modifier.padding(Spacing.xl)) {
+                            Column(Modifier.padding(Spacing.md)) {
                                 Text("Build the perfect round", style = MaterialTheme.typography.titleLarge)
                                 Spacer(Modifier.height(Spacing.sm))
                                 Text(
@@ -225,7 +225,7 @@ private fun DeckLibraryList(
     LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         items(decks, key = { it.id }) { deck -> DeckRow(deck, deck.id in ownedIds, onOpen) }
         if (loading) item("loading") {
-            Box(Modifier.fillMaxWidth().padding(Spacing.lg), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().padding(Spacing.md), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else if (hasMore) item("more") {
@@ -268,7 +268,7 @@ private fun DeckRow(deck: DeckSummary, owned: Boolean, onOpen: (String) -> Unit)
 private fun DeckSkeletons(modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         repeat(5) {
-            Surface(Modifier.fillMaxWidth().height(72.dp), shape = MaterialTheme.shapes.medium,
+            Surface(Modifier.fillMaxWidth().height(Sizes.listRow), shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surfaceVariant) {}
         }
     }

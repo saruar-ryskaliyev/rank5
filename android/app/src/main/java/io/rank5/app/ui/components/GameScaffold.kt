@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
+import io.rank5.app.ui.theme.animateLayoutChanges
 
 /**
  * The single screen frame: gradient background, insets, edge padding, snackbar
@@ -55,14 +56,15 @@ fun GameScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = maxContentWidth)
-                .padding(horizontal = Spacing.screen),
+                .padding(horizontal = Spacing.md),
            ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = Spacing.lg)
+                    .padding(top = Spacing.md)
+                    .animateLayoutChanges()
                     .then(
                         if (scrollable) {
                             Modifier.verticalScroll(rememberScrollState())
@@ -76,7 +78,7 @@ fun GameScaffold(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Spacing.lg, bottom = Spacing.lg),
+                        .padding(top = Spacing.md, bottom = Spacing.md),
                 ) {
                     footer()
                 }

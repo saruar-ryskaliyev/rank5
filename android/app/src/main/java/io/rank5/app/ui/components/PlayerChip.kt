@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import io.rank5.app.ui.theme.LocalRank5Extras
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
@@ -46,7 +45,6 @@ fun PlayerChip(
             Text(
                 text = name.trim().take(1).uppercase().ifEmpty { "?" },
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
                 // Every palette swatch is verified >=3:1 against white.
                 color = Color.White,
             )

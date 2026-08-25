@@ -21,11 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import io.rank5.app.R
 import io.rank5.app.game.BusyAction
@@ -33,6 +30,7 @@ import io.rank5.app.game.UiState
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.SecondaryCta
+import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
 private const val MAX_CODE_LENGTH = 6
@@ -61,7 +59,7 @@ fun HomeScreen(
             Image(
                 painter = painterResource(R.drawable.rank5_brand_mark),
                 contentDescription = null,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.size(Sizes.brandMark),
             )
             Column(modifier = Modifier.padding(start = Spacing.sm)) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
@@ -73,7 +71,7 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.height(Spacing.xxl))
+        Spacer(Modifier.height(Spacing.md))
         Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(Spacing.sm))
         Text(
@@ -81,7 +79,7 @@ fun HomeScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         OutlinedTextField(
             value = state.nickname,
             onValueChange = { onNickname(it.take(28)) },
@@ -96,7 +94,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         Text(stringResource(R.string.start_room), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(Spacing.xs))
         Text(
@@ -113,7 +111,7 @@ fun HomeScreen(
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
+            modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
@@ -152,10 +150,7 @@ fun HomeScreen(
                     onJoin()
                 }
             }),
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                letterSpacing = 2.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            textStyle = MaterialTheme.typography.titleLarge,
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(Spacing.md))
@@ -165,6 +160,6 @@ fun HomeScreen(
             enabled = nameValid && codeValid && state.busyAction == null,
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
     }
 }

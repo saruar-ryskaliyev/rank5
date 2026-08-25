@@ -24,7 +24,7 @@ fun InfoBanner(text: String, modifier: Modifier = Modifier) {
             text = text,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(Spacing.lg),
+            modifier = Modifier.padding(Spacing.md),
         )
     }
 }

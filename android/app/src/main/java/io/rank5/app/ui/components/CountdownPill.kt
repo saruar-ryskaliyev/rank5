@@ -96,7 +96,7 @@ fun CountdownPill(
         border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Coarse (10s-bucket) description so the polite live region doesn't

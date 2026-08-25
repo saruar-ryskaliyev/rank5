@@ -11,94 +11,87 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
+// Two chromatic families only: violet (brand/actions) and rose (celebration/error).
+// Everything else is a black/white neutral variation.
 private val PaperBg = Color(0xFFF8F7FC)
-private val PaperSurface = Color(0xFFFFFFFF)
+private val PaperSurface = Color.White
 private val PaperSurfaceVariant = Color(0xFFEFEDF7)
 private val InkLight = Color(0xFF17151F)
 private val MutedLight = Color(0xFF625F6B)
-private val VioletLight = Color(0xFF5A3FD6)
-private val CelebrationLight = Color(0xFFC33D5C)
-private val SuccessLight = Color(0xFF0B6B61)
-private val ErrorLight = Color(0xFFB3261E)
 private val OutlineLight = Color(0xFFD8D4E3)
+private val Violet = Color(0xFF5A3FD6)
+private val VioletDarkText = Color(0xFF241178)
+private val VioletContainer = Color(0xFFE6E0FF)
+private val Rose = Color(0xFFB3264B)
+private val RoseDarkText = Color(0xFF641A30)
+private val RoseContainer = Color(0xFFF9DCE4)
 
 private val InkBg = Color(0xFF111016)
 private val InkSurface = Color(0xFF1B1922)
 private val InkSurfaceVariant = Color(0xFF272431)
 private val WarmWhite = Color(0xFFF8F7FB)
 private val MutedDark = Color(0xFFB9B5C4)
-private val VioletDark = Color(0xFFA998FF)
-private val CelebrationDark = Color(0xFFFF8BA5)
-private val SuccessDark = Color(0xFF5ED6C2)
-private val ErrorDark = Color(0xFFFF8A80)
 private val OutlineDark = Color(0xFF45414F)
+private val VioletDark = Color(0xFFA998FF)
+private val VioletDarkContainer = Color(0xFF3B2B83)
+private val RoseDark = Color(0xFFFF8BA5)
+private val RoseDarkContainer = Color(0xFF5B2937)
 
 /** Brand colors that have no MaterialTheme role; resolved per light/dark theme. */
 @Immutable
 data class Rank5Extras(
-    val gold: Color,
-    val goldText: Color,
-    val onGold: Color,
+    val highlight: Color,
+    val highlightText: Color,
+    val onHighlight: Color,
     /** Accent used AS TEXT (timer, links, outlined buttons) — AA-safe on bg/cards. */
     val accentText: Color,
-    val urgent: Color,
     /** Player identity hues; every swatch keeps a white initial >=3:1. */
     val avatarPalette: List<Color>,
-    /** Kept as identical endpoints so legacy callers render a flat brand background. */
-    val gradientTop: Color,
-    val gradientBottom: Color,
 )
 
-/** Muted, warm hues shared by both themes; each verified >=3:1 against white. */
+/** Violet/rose variations; each swatch keeps a white initial >=3:1. */
 private val AvatarPalette = listOf(
-    Color(0xFF5A3FD6), Color(0xFF0B6B61), Color(0xFF9B4A67),
-    Color(0xFF536E9F), Color(0xFF7954A8), Color(0xFF8A5C22),
+    Violet, Color(0xFF4931B8), Color(0xFF7559E1),
+    Rose, Color(0xFF92213F), Color(0xFF8D4962),
 )
 
 private val LightExtras = Rank5Extras(
-    gold = Color(0xFFFFE5A3),
-    goldText = Color(0xFF755500),
-    onGold = InkLight,
-    accentText = CelebrationLight,
-    urgent = ErrorLight,
+    highlight = RoseContainer,
+    highlightText = RoseDarkText,
+    onHighlight = InkLight,
+    accentText = Rose,
     avatarPalette = AvatarPalette,
-    gradientTop = PaperBg,
-    gradientBottom = PaperBg,
 )
 
 private val DarkExtras = Rank5Extras(
-    gold = Color(0xFF5A4821),
-    goldText = Color(0xFFFFD978),
-    onGold = WarmWhite,
-    accentText = CelebrationDark,
-    urgent = ErrorDark,
+    highlight = RoseDarkContainer,
+    highlightText = RoseDark,
+    onHighlight = WarmWhite,
+    accentText = RoseDark,
     avatarPalette = AvatarPalette,
-    gradientTop = InkBg,
-    gradientBottom = InkBg,
 )
 
 val LocalRank5Extras = staticCompositionLocalOf { LightExtras }
 
 private val LightScheme = lightColorScheme(
-    primary = VioletLight,
+    primary = Violet,
     onPrimary = Color.White,
     // Container roles stay warm — M3 baseline defaults are lavender/purple.
-    primaryContainer = Color(0xFFE6E0FF),
-    onPrimaryContainer = Color(0xFF241178),
-    secondary = CelebrationLight,
+    primaryContainer = VioletContainer,
+    onPrimaryContainer = VioletDarkText,
+    secondary = Rose,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFF9DCE4),
-    onSecondaryContainer = Color(0xFF641A30),
-    tertiary = SuccessLight,
+    secondaryContainer = RoseContainer,
+    onSecondaryContainer = RoseDarkText,
+    tertiary = Violet,
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFD6E8D4),
-    onTertiaryContainer = Color(0xFF1F4A27),
-    error = ErrorLight,
+    tertiaryContainer = VioletContainer,
+    onTertiaryContainer = VioletDarkText,
+    error = Rose,
     onError = Color.White,
-    errorContainer = Color(0xFFF9DEDC),
-    onErrorContainer = Color(0xFF8C1D18),
+    errorContainer = RoseContainer,
+    onErrorContainer = RoseDarkText,
     background = PaperBg,
     onBackground = InkLight,
     surface = PaperSurface,
@@ -118,20 +111,20 @@ private val LightScheme = lightColorScheme(
 private val DarkScheme = darkColorScheme(
     primary = VioletDark,
     onPrimary = InkBg,
-    primaryContainer = Color(0xFF3B2B83),
+    primaryContainer = VioletDarkContainer,
     onPrimaryContainer = Color(0xFFE7E1FF),
-    secondary = CelebrationDark,
+    secondary = RoseDark,
     onSecondary = InkBg,
-    secondaryContainer = Color(0xFF5B2937),
+    secondaryContainer = RoseDarkContainer,
     onSecondaryContainer = Color(0xFFFFD9E2),
-    tertiary = SuccessDark,
+    tertiary = VioletDark,
     onTertiary = InkBg,
-    tertiaryContainer = Color(0xFF164D45),
-    onTertiaryContainer = Color(0xFFC4F5EA),
-    error = ErrorDark,
+    tertiaryContainer = VioletDarkContainer,
+    onTertiaryContainer = Color(0xFFE7E1FF),
+    error = RoseDark,
     onError = InkBg,
-    errorContainer = Color(0xFF5C2019),
-    onErrorContainer = Color(0xFFFFDAD4),
+    errorContainer = RoseDarkContainer,
+    onErrorContainer = Color(0xFFFFD9E2),
     background = InkBg,
     onBackground = WarmWhite,
     surface = InkSurface,
@@ -148,9 +141,9 @@ private val DarkScheme = darkColorScheme(
 )
 
 private val Rank5Shapes = Shapes(
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
+    small = RoundedCornerShape(Corners.compact),
+    medium = RoundedCornerShape(Corners.compact),
+    large = RoundedCornerShape(Corners.roomy),
 )
 
 @Composable

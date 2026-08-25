@@ -129,7 +129,7 @@ fun SubmitScreen(
                 onTimeUp = onTimeUp,
             )
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
 
         SourceDeckLabel(
             room.canonicalSelectedDecks().firstOrNull { it.id == round.question.deckId }
@@ -165,7 +165,7 @@ fun SubmitScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
             DraggableRankList(
                 items = state.localRanking.ifEmpty { round.myRanking.orEmpty() },
                 onReorder = {},
@@ -199,7 +199,7 @@ fun SubmitScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
             Text(
                 text = "1 = most · 5 = least",
                 style = MaterialTheme.typography.labelSmall,

@@ -51,9 +51,11 @@ import io.rank5.app.game.Screen
 import io.rank5.app.game.UiState
 import io.rank5.app.stats.GuestResultClaim
 import io.rank5.app.stats.StatsViewModel
+import io.rank5.app.ui.theme.Motion
 import kotlinx.coroutines.launch
 
 private enum class AppTab { Play, Decks, Profile }
+private enum class AppDestination { LiveGame, Play, Decks, Profile }
 
 @Composable
 fun Rank5App(
@@ -213,8 +215,22 @@ fun Rank5App(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            when {
-                inLiveGame -> GameFlow(
+            val destination = when {
+                inLiveGame -> AppDestination.LiveGame
+                tab == AppTab.Play -> AppDestination.Play
+                tab == AppTab.Decks -> AppDestination.Decks
+                else -> AppDestination.Profile
+            }
+            AnimatedContent(
+                targetState = destination,
+                transitionSpec = {
+                    fadeIn(tween(Motion.standardMillis)) togetherWith
+                        fadeOut(tween(Motion.fastMillis))
+                },
+                label = "app destination",
+            ) { currentDestination ->
+              when (currentDestination) {
+                AppDestination.LiveGame -> GameFlow(
                     state = state,
                     snackbarHostState = snackbarHostState,
                     gameVm = gameVm,
@@ -245,7 +261,7 @@ fun Rank5App(
                     onRequestLeave = { showLeaveDialog = true },
                     soundPlayer = soundPlayer,
                 )
-                tab == AppTab.Play -> HomeScreen(
+                AppDestination.Play -> HomeScreen(
                     state = state,
                     snackbarHostState = snackbarHostState,
                     onNickname = gameVm::updateNickname,
@@ -253,7 +269,7 @@ fun Rank5App(
                     onCreate = gameVm::createAndJoin,
                     onJoin = gameVm::joinRoom,
                 )
-                tab == AppTab.Decks -> DecksTab(
+                AppDestination.Decks -> DecksTab(
                     decksState = decksState,
                     authState = authState,
                     snackbarHostState = snackbarHostState,
@@ -279,7 +295,7 @@ fun Rank5App(
                         }
                     },
                 )
-                tab == AppTab.Profile -> ProfileScreen(
+                AppDestination.Profile -> ProfileScreen(
                     authState = authState,
                     snackbarHostState = snackbarHostState,
                     busy = authBusy,
@@ -305,6 +321,7 @@ fun Rank5App(
                         }
                     },
                 )
+              }
             }
         }
     }
@@ -426,8 +443,8 @@ private fun GameFlow(
     AnimatedContent(
         targetState = state.screen,
         transitionSpec = {
-            (slideInVertically { it / 12 } + fadeIn(tween(300))) togetherWith
-                fadeOut(tween(150))
+            (slideInVertically { it / 12 } + fadeIn(tween(Motion.standardMillis))) togetherWith
+                fadeOut(tween(Motion.fastMillis))
         },
         label = "screen",
     ) { screen ->

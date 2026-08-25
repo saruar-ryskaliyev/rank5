@@ -51,7 +51,7 @@ fun ConfettiBurst(play: Boolean, modifier: Modifier = Modifier) {
 
     val extras = LocalRank5Extras.current
     val particles = remember {
-        buildParticles(Random(System.nanoTime()), extras.avatarPalette + extras.gold)
+        buildParticles(Random(System.nanoTime()), extras.avatarPalette + extras.highlight)
     }
     var progress by remember { mutableFloatStateOf(0f) }
 

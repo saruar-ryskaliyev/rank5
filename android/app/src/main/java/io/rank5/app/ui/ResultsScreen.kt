@@ -121,26 +121,26 @@ fun ResultsScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.md))
                 val winner = room.players.maxByOrNull { it.score }
                 Text(
                     if (room.mode == "coop") "That’s the game" else "${winner?.nickname ?: "Winner"} takes it",
                     style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 if (room.mode == "coop") {
                     CoopResults(state = state)
                 } else {
                     VersusPodium(players = room.players)
                 }
                 if (state.roundHistory.isNotEmpty()) {
-                    Spacer(Modifier.height(Spacing.xl))
+                    Spacer(Modifier.height(Spacing.md))
                     DeckMixSummary(room.canonicalSelectedDecks())
-                    Spacer(Modifier.height(Spacing.lg))
+                    Spacer(Modifier.height(Spacing.md))
                     RoundBreakdown(state)
                 }
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 ShareResultCard(
                     data = ResultCardData.from(state),
                     onShare = onShare,
@@ -175,7 +175,7 @@ fun ResultsScreen(
                                 color = MaterialTheme.colorScheme.errorContainer,
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Column(modifier = Modifier.padding(Spacing.lg)) {
+                                Column(modifier = Modifier.padding(Spacing.md)) {
                                     Text(
                                         claimStatus.message,
                                         style = MaterialTheme.typography.bodyMedium,
@@ -192,7 +192,7 @@ fun ResultsScreen(
                         }
                     }
                 }
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
             }
             ConfettiBurst(play = true, modifier = Modifier.matchParentSize())
         }
@@ -207,7 +207,7 @@ private fun ShareResultCard(data: ResultCardData, onShare: () -> Unit) {
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Text("SHARE YOUR RESULT", style = MaterialTheme.typography.labelMedium)
             Spacer(Modifier.height(Spacing.sm))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -287,7 +287,7 @@ private fun SaveStatsPrompt(loading: Boolean, onSave: () -> Unit) {
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Text(
                 "Save your stats",
                 style = MaterialTheme.typography.titleMedium,
@@ -334,7 +334,7 @@ private fun CoopResults(state: UiState) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     if (state.roundHistory.isNotEmpty()) {
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -370,11 +370,11 @@ private fun VersusPodium(players: List<PlayerView>) {
                 .fillMaxWidth()
                 .padding(bottom = Spacing.sm),
             shape = MaterialTheme.shapes.medium,
-            color = if (winner) extras.gold else MaterialTheme.colorScheme.surface,
+            color = if (winner) extras.highlight else MaterialTheme.colorScheme.surface,
             border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RankBadge(rank = i + 1)
@@ -388,7 +388,7 @@ private fun VersusPodium(players: List<PlayerView>) {
                 Text(
                     text = "${formatPts(p.score)} pts",
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (winner) extras.onGold else extras.accentText,
+                    color = if (winner) extras.onHighlight else extras.accentText,
                 )
             }
         }

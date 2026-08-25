@@ -10,9 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
 import io.rank5.app.ui.theme.Sizes
@@ -24,7 +22,6 @@ fun DeckIconTile(
     deckName: String,
     modifier: Modifier = Modifier,
     size: Dp = Sizes.iconTile,
-    emojiSize: TextUnit = 24.sp,
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
 ) {
     Surface(
@@ -37,7 +34,7 @@ fun DeckIconTile(
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = emoji.ifBlank { "🃏" },
-                fontSize = emojiSize,
+                style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
             )
         }

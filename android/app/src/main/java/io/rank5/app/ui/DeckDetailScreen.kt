@@ -43,16 +43,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.rank5.app.deck.Deck
 import io.rank5.app.deck.DeckQuestion
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.Rank5TopBar
+import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
 @Composable
@@ -113,11 +111,11 @@ fun DeckDetailScreen(
         },
     ) {
         Rank5TopBar(title = "Deck details", onBack = onBack)
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
 
         if (loading && deck == null) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxxl),
+                modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CircularProgressIndicator()
@@ -129,7 +127,7 @@ fun DeckDetailScreen(
         val current = deck ?: return@GameScaffold
 
         DeckHero(current, canEdit)
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
 
         if (canEdit) {
             OwnerActions(
@@ -139,7 +137,7 @@ fun DeckDetailScreen(
                 onPublish = onPublish,
                 onUnpublish = onUnpublish,
             )
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.md))
         } else if (current.isBuiltin || current.isPublic) {
             OutlinedButton(
                 onClick = { if (signedIn) onToggleSaved() else showSaveSignIn = true },
@@ -151,7 +149,10 @@ fun DeckDetailScreen(
                     },
             ) {
                 if (savingSaved) {
-                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(
+                        Modifier.size(Sizes.ctaSpinner),
+                        strokeWidth = Sizes.ctaSpinnerStroke,
+                    )
                 } else {
                     Icon(
                         if (isSaved) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
@@ -161,7 +162,7 @@ fun DeckDetailScreen(
                 Spacer(Modifier.width(Spacing.sm))
                 Text(if (isSaved) "Saved" else "Save")
             }
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.md))
         }
 
         Row(verticalAlignment = Alignment.Bottom) {
@@ -188,7 +189,7 @@ fun DeckDetailScreen(
         }
 
         if (canEdit) {
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.md))
             HorizontalDivider()
             Spacer(Modifier.height(Spacing.md))
             Text("Danger area", style = MaterialTheme.typography.titleMedium)
@@ -203,13 +204,13 @@ fun DeckDetailScreen(
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
             ) { Text("Delete deck") }
         } else if (current.isPublic && !current.isBuiltin) {
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
             TextButton(
                 onClick = { if (signedIn) showReport = true else showReportSignIn = true },
                 enabled = !saving,
             ) { Text("Report this deck") }
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
     }
 
     if (showReportSignIn) AlertDialog(
@@ -282,19 +283,18 @@ private fun DeckHero(deck: Deck, canEdit: Boolean) {
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
-        Column(Modifier.padding(Spacing.xl)) {
+        Column(Modifier.padding(Spacing.md)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DeckIconTile(
                     emoji = deck.emoji,
                     deckName = deck.title,
-                    size = 64.dp,
-                    emojiSize = 32.sp,
+                    size = Sizes.deckHero,
                     containerColor = MaterialTheme.colorScheme.surface,
                 )
                 Spacer(Modifier.width(Spacing.md))
                 DeckStatus(deck, canEdit)
             }
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
             Text(
                 deck.title,
                 style = MaterialTheme.typography.headlineLarge,
@@ -331,7 +331,7 @@ private fun DeckStatus(deck: Deck, canEdit: Boolean) {
             modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp),
+            Icon(icon, contentDescription = null, modifier = Modifier.size(Sizes.metadataIcon),
                 tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(Spacing.sm))
             Text(label, style = MaterialTheme.typography.labelLarge,
@@ -346,7 +346,7 @@ private fun MetadataLine(icon: @Composable () -> Unit, text: String) {
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(Sizes.compactIcon),
         ) { Box(contentAlignment = Alignment.Center) { icon() } }
         Spacer(Modifier.width(Spacing.sm))
         Text(text, style = MaterialTheme.typography.bodyMedium,
@@ -370,7 +370,7 @@ private fun OwnerActions(
                 "This deck was removed from the community library, but remains editable here.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(Spacing.lg),
+                modifier = Modifier.padding(Spacing.md),
             )
         }
         Spacer(Modifier.height(Spacing.sm))
@@ -400,12 +400,12 @@ private fun QuestionPreview(number: Int, question: DeckQuestion) {
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(Spacing.lg)) {
+        Column(Modifier.padding(Spacing.md)) {
             Row(verticalAlignment = Alignment.Top) {
                 Surface(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(Sizes.actionIcon),
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.primaryContainer,
                 ) {

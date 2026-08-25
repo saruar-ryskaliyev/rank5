@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,8 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.dp
 import io.rank5.app.deck.DeckQuestion
 import io.rank5.app.deck.MaxDeckQuestions
 import io.rank5.app.deck.MinDeckQuestions
@@ -90,10 +88,10 @@ fun DeckEditorScreen(
         },
     ) {
         Rank5TopBar(if (isNew) "New deck" else "Edit deck", onBack = leave)
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         if (generatedDraft) {
             InfoBanner("AI-generated draft — review the title, questions, and every option before saving.")
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
         }
         Text("Deck identity", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(Spacing.sm))
@@ -107,7 +105,7 @@ fun DeckEditorScreen(
             enabled = !saving,
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         SectionLabel("DECK ICON")
         Spacer(Modifier.height(Spacing.sm))
         Row(
@@ -122,11 +120,15 @@ fun DeckEditorScreen(
                     modifier = Modifier.size(Sizes.iconTile),
                     shape = MaterialTheme.shapes.small,
                     color = if (emoji == choice) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                    border = BorderStroke(1.dp, if (emoji == choice) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
-                ) { Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) { Text(choice, fontSize = 23.sp) } }
+                    border = BorderStroke(Sizes.hairline, if (emoji == choice) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Text(choice, style = MaterialTheme.typography.headlineMedium)
+                    }
+                }
             }
         }
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Questions", style = MaterialTheme.typography.titleLarge)
@@ -161,11 +163,11 @@ fun DeckEditorScreen(
             enabled = !saving,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Icon(Icons.Filled.Add, contentDescription = null)
+            Icon(Icons.Rounded.Add, contentDescription = null)
             Spacer(Modifier.size(Spacing.sm))
             Text("Add question")
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
     }
 
     if (confirmDiscard) AlertDialog(
@@ -199,7 +201,7 @@ private fun QuestionEditor(
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.padding(Spacing.lg)) {
+        Column(Modifier.padding(Spacing.md)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Question ${index + 1}", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 IconButton(onClick = { onMove(index - 1) }, enabled = enabled && index > 0) {
@@ -209,7 +211,7 @@ private fun QuestionEditor(
                     Icon(Icons.Rounded.ArrowDownward, "Move question down")
                 }
                 IconButton(onClick = onRemove, enabled = enabled && total > 1) {
-                    Icon(Icons.Filled.Delete, "Remove question", tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Rounded.Delete, "Remove question", tint = MaterialTheme.colorScheme.error)
                 }
             }
             OutlinedTextField(

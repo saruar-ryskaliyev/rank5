@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
@@ -31,10 +30,10 @@ fun RankCard(
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
         // Paper-on-paper tactility in light; border-only in dark.
-        shadowElevation = if (isSystemInDarkTheme()) 0.dp else Sizes.hairline,
+        shadowElevation = if (isSystemInDarkTheme()) Sizes.flatElevation else Sizes.hairline,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RankBadge(rank = rank)

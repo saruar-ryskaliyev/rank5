@@ -70,7 +70,7 @@ fun DeckGeneratorScreen(
         },
     ) {
         Rank5TopBar("Create with AI", onBack = onBack)
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         Text("What should the deck be about?", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(Spacing.xs))
         Text(
@@ -78,7 +78,7 @@ fun DeckGeneratorScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         OutlinedTextField(
             value = topic,
             onValueChange = onTopic,
@@ -105,7 +105,7 @@ fun DeckGeneratorScreen(
                 )
             }
         }
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         SectionLabel("NUMBER OF QUESTIONS")
         Spacer(Modifier.height(Spacing.sm))
         Row(
@@ -121,7 +121,7 @@ fun DeckGeneratorScreen(
                 )
             }
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         InfoBanner("AI-generated content can be imperfect. Nothing is saved or published until you review the draft and tap Create deck.")
         if (error != null) {
             Spacer(Modifier.height(Spacing.md))
@@ -131,6 +131,6 @@ fun DeckGeneratorScreen(
                 color = MaterialTheme.colorScheme.error,
             )
         }
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
     }
 }

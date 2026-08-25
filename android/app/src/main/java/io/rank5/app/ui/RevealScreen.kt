@@ -120,7 +120,7 @@ fun RevealScreen(
                 onExpire = { /* server advances */ },
             )
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
 
         SourceDeckLabel(
             room.canonicalSelectedDecks().firstOrNull { it.id == round.question.deckId }
@@ -152,7 +152,7 @@ fun RevealScreen(
         }
         StaggeredRankList(items = subjectRanking, roundKey = round.index)
 
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         SectionLabel("THE GUESSES")
         Spacer(Modifier.height(Spacing.sm))
 
@@ -196,7 +196,7 @@ fun RevealScreen(
             )
         }
 
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         SectionLabel("READY $readyCount/${connected.size}")
         Spacer(Modifier.height(Spacing.sm))
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -208,7 +208,7 @@ fun RevealScreen(
                 )
             }
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
     }
 }
 
@@ -263,7 +263,7 @@ private fun GuessCard(
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
     ) {
-        Column(Modifier.padding(Spacing.lg)) {
+        Column(Modifier.padding(Spacing.md)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -322,7 +322,7 @@ private fun GuessCard(
 private fun DeltaChip(delta: Int, modifier: Modifier = Modifier) {
     val color = when {
         delta == 0 -> MaterialTheme.colorScheme.tertiary
-        delta == 1 -> LocalRank5Extras.current.goldText
+        delta == 1 -> LocalRank5Extras.current.highlightText
         else -> MaterialTheme.colorScheme.error
     }
     Surface(

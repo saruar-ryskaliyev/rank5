@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
@@ -58,10 +58,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.rank5.app.R
 import io.rank5.app.deck.DeckSummary
 import io.rank5.app.game.BusyAction
@@ -81,6 +78,7 @@ import io.rank5.app.ui.components.Rank5TopBar
 import io.rank5.app.ui.components.SectionLabel
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
+import io.rank5.app.ui.theme.animateLayoutChanges
 import kotlinx.coroutines.launch
 
 @Composable
@@ -145,7 +143,7 @@ fun LobbyScreen(
         } else null,
     ) {
         Rank5TopBar(title = "Game lobby", onBack = onLeave)
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         RoomCodeCard(
             code = room.code,
             onCopy = {
@@ -163,7 +161,7 @@ fun LobbyScreen(
                 onCodeConfirmed()
             },
         )
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         SectionLabel("PLAYERS (${room.players.size})")
         Spacer(Modifier.height(Spacing.md))
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -176,7 +174,7 @@ fun LobbyScreen(
                 )
             }
         }
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
 
         if (state.isHost) {
             HostSettings(
@@ -199,10 +197,10 @@ fun LobbyScreen(
                 decks = room.canonicalSelectedDecks(),
                 rounds = room.totalRounds,
             )
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.md))
             InfoBanner("Waiting for $hostName to start the game")
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
     }
 }
 
@@ -215,14 +213,14 @@ private fun RoomCodeCard(code: String, onCopy: () -> Unit, onShare: () -> Unit) 
         border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(Spacing.lg),
+            Modifier.fillMaxWidth().padding(Spacing.md),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SectionLabel("ROOM CODE")
             Spacer(Modifier.height(Spacing.sm))
             Text(
                 code,
-                style = MaterialTheme.typography.displayLarge.copy(letterSpacing = 4.sp),
+                style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
@@ -238,7 +236,7 @@ private fun RoomCodeCard(code: String, onCopy: () -> Unit, onShare: () -> Unit) 
                     Text("Copy")
                 }
                 OutlinedButton(onClick = onShare) {
-                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Icon(Icons.Rounded.Share, contentDescription = null)
                     Spacer(Modifier.width(Spacing.sm))
                     Text("Share")
                 }
@@ -312,7 +310,7 @@ private fun HostSettings(
             ) { Text(label) }
         }
     }
-    Spacer(Modifier.height(Spacing.lg))
+    Spacer(Modifier.height(Spacing.md))
     SectionLabel("DECK MIX")
     Spacer(Modifier.height(Spacing.sm))
     SelectedDeckList(selected, onRemoveDeck)
@@ -342,7 +340,7 @@ private fun HostSettings(
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Spacer(Modifier.height(Spacing.lg))
+    Spacer(Modifier.height(Spacing.md))
     SectionLabel("ROUNDS")
     Spacer(Modifier.height(Spacing.sm))
     val choices = allowedRoundChoices(combinedQuestionCount(selected))
@@ -373,7 +371,10 @@ private fun HostSettings(
 
 @Composable
 private fun SelectedDeckList(selected: List<DeckInfo>, onRemove: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+    Column(
+        modifier = Modifier.animateLayoutChanges(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
         selected.forEach { deck ->
             androidx.compose.runtime.key(deck.id) {
                 Surface(
@@ -425,7 +426,7 @@ private fun DeckPickerSheet(
     onToggle: (LobbyDeckOption) -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.md)) {
             Text("Choose decks", style = MaterialTheme.typography.headlineSmall)
             Text(
                 stringResource(R.string.deck_mix_picker_help),
@@ -444,7 +445,7 @@ private fun DeckPickerSheet(
             val filtered = remember(options, query) {
                 options.filter { query.isBlank() || it.name.contains(query.trim(), ignoreCase = true) }
             }
-            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 480.dp)) {
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = Sizes.pickerMaxHeight)) {
                 items(filtered, key = { it.id }) { deck ->
                     val selected = deck.id in selectedIds
                     val canAdd = selected || selectedIds.size < MaxSelectedDecks
@@ -465,7 +466,7 @@ private fun DeckPickerSheet(
                         DeckIconTile(deck.emoji, deck.name)
                         Spacer(Modifier.width(Spacing.md))
                         Column(Modifier.weight(1f)) {
-                            Text(deck.name, fontWeight = FontWeight.SemiBold)
+                            Text(deck.name, style = MaterialTheme.typography.titleMedium)
                             Text(
                                 deck.metadata,
                                 style = MaterialTheme.typography.labelSmall,
@@ -476,14 +477,14 @@ private fun DeckPickerSheet(
                     HorizontalDivider()
                 }
                 if (loading) item("loading") {
-                    Row(Modifier.fillMaxWidth().padding(Spacing.lg), horizontalArrangement = Arrangement.Center) {
+                    Row(Modifier.fillMaxWidth().padding(Spacing.md), horizontalArrangement = Arrangement.Center) {
                         CircularProgressIndicator()
                     }
                 } else if (filtered.isEmpty()) item("empty") {
-                    Text("No decks match your search.", Modifier.padding(Spacing.lg))
+                    Text("No decks match your search.", Modifier.padding(Spacing.md))
                 }
             }
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.md))
         }
     }
 }
@@ -497,7 +498,7 @@ private fun GuestSettingsSummary(mode: String, decks: List<DeckInfo>, rounds: In
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Text(
                 if (mode == "versus") "Compete for the high score" else "Team up for one score",
                 style = MaterialTheme.typography.titleMedium,

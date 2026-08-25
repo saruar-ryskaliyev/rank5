@@ -37,8 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import io.rank5.app.BuildConfig
 import io.rank5.app.R
 import io.rank5.app.audio.AudioSettings
@@ -80,7 +78,7 @@ fun ProfileScreen(
 
     GameScaffold(snackbarHostState = snackbarHostState, scrollable = true) {
         Text("Profile", style = MaterialTheme.typography.headlineLarge)
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
 
         SectionLabel("ACCOUNT")
         Spacer(Modifier.height(Spacing.sm))
@@ -97,7 +95,7 @@ fun ProfileScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 GoogleSignInButton(
                     onClick = onSignInGoogle,
                     busy = busy,
@@ -109,7 +107,7 @@ fun ProfileScreen(
                     shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(Modifier.padding(Spacing.lg)) {
+                    Column(Modifier.padding(Spacing.md)) {
                         PlayerChip(
                             name = authState.user.displayName,
                             colorSeed = authState.user.avatarSeed.ifBlank { authState.user.id },
@@ -120,18 +118,14 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 StatsSection(state = statsState, onRetry = onRetryStats)
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 SectionLabel("MY DECKS")
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
                     if (myDeckCount == 0) "No decks yet" else "$myDeckCount deck${if (myDeckCount == 1) "" else "s"}",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onOpenMyDecks),
                 )
                 TextButton(onClick = onOpenMyDecks) {
                     Text("Open Decks")
@@ -139,7 +133,7 @@ fun ProfileScreen(
             }
         }
 
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
         AudioSettingsSection(
             settings = audioSettings,
             onGameSoundsEnabled = onGameSoundsEnabled,
@@ -147,7 +141,7 @@ fun ProfileScreen(
             onAllowInSilentMode = onAllowInSilentMode,
             onPreviewSound = onPreviewSound,
         )
-        Spacer(Modifier.height(Spacing.xl))
+        Spacer(Modifier.height(Spacing.md))
 
         when (authState) {
             is AuthState.SignedOut -> {
@@ -164,7 +158,7 @@ fun ProfileScreen(
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
                 SectionLabel("DANGER AREA")
                 Spacer(Modifier.height(Spacing.sm))
                 Surface(
@@ -172,7 +166,7 @@ fun ProfileScreen(
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(Modifier.padding(Spacing.lg)) {
+                    Column(Modifier.padding(Spacing.md)) {
                         Text("Delete account", style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer)
                         Text("Permanently removes your profile and private decks.",
@@ -185,7 +179,7 @@ fun ProfileScreen(
                         ) { Text("Delete account") }
                     }
                 }
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.md))
                 TextButton(onClick = {
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl)))
                 }) {
@@ -235,8 +229,8 @@ private fun GoogleSignInButton(
         // providing a full-size accessible touch target.
         Box(
             modifier = Modifier
-                .width(180.dp)
-                .height(48.dp)
+                .width(Sizes.googleButtonWidth)
+                .height(Sizes.googleButtonHeight)
                 .semantics(mergeDescendants = true) {
                     contentDescription = "Sign in with Google"
                 }
@@ -251,8 +245,8 @@ private fun GoogleSignInButton(
                 painter = painterResource(R.drawable.google_sign_in),
                 contentDescription = null,
                 modifier = Modifier
-                    .width(180.dp)
-                    .height(40.dp),
+                    .width(Sizes.googleButtonWidth)
+                    .height(Sizes.googleButtonArtworkHeight),
             )
         }
         if (busy) {
@@ -290,7 +284,7 @@ private fun AudioSettingsSection(
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(Spacing.lg)) {
+        Column(Modifier.padding(Spacing.md)) {
             SettingSwitchRow(
                 title = "Game sounds",
                 supporting = "Meaningful cues for ranking, reveals, and results",
@@ -357,7 +351,7 @@ private fun StatsSection(state: StatsUiState, onRetry: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = Spacing.xl),
+                    .padding(vertical = Spacing.md),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(Sizes.badge))
@@ -381,7 +375,7 @@ private fun StatsSection(state: StatsUiState, onRetry: () -> Unit) {
                     "Play your first game to start building stats.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(Spacing.lg),
+                    modifier = Modifier.padding(Spacing.md),
                 )
             }
         }
@@ -417,7 +411,7 @@ private fun StatsContent(stats: StatsResponse) {
     }
 
     if (stats.coop.bestByRounds.isNotEmpty()) {
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         Text("Co-op bests", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(Spacing.sm))
         stats.coop.bestByRounds.forEach { best ->
@@ -480,7 +474,7 @@ private fun StatTile(value: String, label: String, modifier: Modifier = Modifier
         shape = MaterialTheme.shapes.medium,
         modifier = modifier,
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Text(
                 value,
                 style = MaterialTheme.typography.headlineMedium,
