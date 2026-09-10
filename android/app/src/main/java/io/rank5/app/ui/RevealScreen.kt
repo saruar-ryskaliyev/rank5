@@ -113,7 +113,12 @@ fun RevealScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = if (amSubject) "Your real order" else "${nameOf(round.subjectId)}'s real order",
+                text = when {
+                    round.question.usesPlayersAsOptions && amSubject -> "Your call"
+                    round.question.usesPlayersAsOptions -> "${nameOf(round.subjectId)}'s call"
+                    amSubject -> "Your real order"
+                    else -> "${nameOf(round.subjectId)}'s real order"
+                },
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.weight(1f),
             )
@@ -138,8 +143,9 @@ fun RevealScreen(
         var revealAudioStarted by rememberSaveable(round.index, round.question.id) { mutableStateOf(false) }
         var scoreAudioStarted by rememberSaveable(round.index, round.question.id) { mutableStateOf(false) }
         val reducedMotion = Motion.reducedMotion()
+        val expectedOptions = round.question.options.size
         LaunchedEffect(subjectRanking) {
-            if (revealAudioStarted || subjectRanking.size != 5) return@LaunchedEffect
+            if (revealAudioStarted || subjectRanking.size != expectedOptions) return@LaunchedEffect
             revealAudioStarted = true
             subjectRanking.indices.forEachIndexed { position, cardIndex ->
                 onRevealCard(cardIndex)
@@ -147,7 +153,7 @@ fun RevealScreen(
             }
         }
         LaunchedEffect(subjectRanking, localScore) {
-            if (scoreAudioStarted || subjectRanking.size != 5 || localScore == null) {
+            if (scoreAudioStarted || subjectRanking.size != expectedOptions || localScore == null) {
                 return@LaunchedEffect
             }
             scoreAudioStarted = true

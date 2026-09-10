@@ -10,9 +10,9 @@ const val QuestionKindPlayers = "players"
 @Serializable
 data class DeckQuestion(
     val id: String = "",
-    val kind: String = QuestionKindOptions,
     val prompt: String = "",
     val options: List<String> = List(5) { "" },
+    val kind: String = QuestionKindOptions,
 ) {
     val usesPlayersAsOptions: Boolean get() = kind == QuestionKindPlayers
 }

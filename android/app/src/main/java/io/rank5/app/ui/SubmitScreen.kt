@@ -113,7 +113,8 @@ fun SubmitScreen(
                             onLockIn()
                         },
                         loading = state.submitting,
-                        enabled = state.localRanking.size == 5 && !state.skippingQuestion,
+                        enabled = state.localRanking.size == round.question.options.size &&
+                            !state.skippingQuestion,
                     )
                     Spacer(Modifier.height(Spacing.sm))
                     Text(
@@ -204,17 +205,26 @@ fun SubmitScreen(
                 modifier = Modifier.weight(1f),
             )
         } else {
+            val rankingPlayers = round.question.usesPlayersAsOptions
             if (amSubject) {
                 Text(round.question.prompt, style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
-                    text = "Your honest order — friends are guessing it. #1 = your top pick.",
+                    text = if (rankingPlayers) {
+                        "Your honest call — friends are guessing it. #1 = most likely."
+                    } else {
+                        "Your honest order — friends are guessing it. #1 = your top pick."
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
                 Text(
-                    text = "How will $subjectName rank these?",
+                    text = if (rankingPlayers) {
+                        "How will $subjectName rank the group?"
+                    } else {
+                        "How will $subjectName rank these?"
+                    },
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Spacer(Modifier.height(Spacing.sm))
@@ -225,14 +235,14 @@ fun SubmitScreen(
                 )
                 Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    text = "#1 = their top pick",
+                    text = if (rankingPlayers) "#1 = who they'd pick first" else "#1 = their top pick",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(Modifier.height(Spacing.md))
             Text(
-                text = "1 = most · 5 = least",
+                text = rankingLegend(round.question.options.size, rankingPlayers),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

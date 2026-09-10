@@ -30,6 +30,9 @@ import kotlinx.serialization.json.Json
 
 const val MaxSelectedDecks = 5
 
+/** Questions that rank the players themselves need a real group to be fun. */
+const val MinPlayersForPlayerQuestions = 3
+
 /** Which button is currently waiting on the server; each renders its own spinner. */
 enum class BusyAction { Create, Join, Start }
 
@@ -80,6 +83,23 @@ fun removeDeckSelection(current: List<DeckInfo>, deckId: String): List<DeckInfo>
     if (current.size <= 1) current else current.filterNot { it.id == deckId }
 
 fun combinedQuestionCount(decks: List<DeckInfo>): Int = decks.sumOf { it.questionCount.coerceAtLeast(0) }
+
+/**
+ * Explains what a small room should expect from "most likely" questions:
+ * they are skipped below three players, and a mix made only of them cannot
+ * start at all. Returns null when there is nothing to warn about.
+ */
+fun playerQuestionWarning(decks: List<DeckInfo>, connectedPlayers: Int): String? {
+    val playerQuestions = decks.sumOf { it.playerQuestionCount.coerceAtLeast(0) }
+    if (playerQuestions == 0 || connectedPlayers >= MinPlayersForPlayerQuestions) return null
+    return if (playerQuestions >= combinedQuestionCount(decks)) {
+        "These questions rank the players, so you need at least " +
+            "$MinPlayersForPlayerQuestions. Invite someone or add another deck."
+    } else {
+        "$playerQuestions question${if (playerQuestions == 1) "" else "s"} rank the players " +
+            "and need $MinPlayersForPlayerQuestions+. They'll be skipped with this group."
+    }
+}
 
 fun allowedRoundChoices(questionCount: Int): List<Int> {
     if (questionCount <= 0) return listOf(3, 5, 6)
@@ -368,9 +388,9 @@ class GameViewModel(
     fun submitEntry(auto: Boolean = false) {
         val s = _state.value
         val ranking = s.localRanking
-        if (ranking.size != 5) return
         if (s.submitting || s.skippingQuestion) return
         val round = s.room?.currentRound ?: return
+        if (ranking.size != round.question.options.size) return
         val already = round.submitted[s.playerId] == true
         if (already) return
         _state.update {
@@ -509,6 +529,9 @@ class GameViewModel(
                 "Couldn't rejoin. Join again with the room code."
             msg.contains("need at least 2 players", ignoreCase = true) ->
                 "You need at least 2 players to start."
+            msg.contains("need at least 3 players", ignoreCase = true) ->
+                "These questions rank the players, so you need at least 3. " +
+                    "Invite someone or pick another deck."
             msg.contains("already submitted", ignoreCase = true) ->
                 "You already locked in."
             msg.contains("only the subject", ignoreCase = true) ->

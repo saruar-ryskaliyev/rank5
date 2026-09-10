@@ -68,6 +68,7 @@ import io.rank5.app.game.MaxSelectedDecks
 import io.rank5.app.game.UiState
 import io.rank5.app.game.allowedRoundChoices
 import io.rank5.app.game.combinedQuestionCount
+import io.rank5.app.game.playerQuestionWarning
 import io.rank5.app.net.DeckInfo
 import io.rank5.app.net.canonicalSelectedDecks
 import io.rank5.app.ui.components.CenteredLoading
@@ -192,6 +193,11 @@ fun LobbyScreen(
             }
         }
         Spacer(Modifier.height(Spacing.md))
+
+        playerQuestionWarning(state.selectedDecks, connectedCount)?.let { warning ->
+            InfoBanner(warning)
+            Spacer(Modifier.height(Spacing.md))
+        }
 
         if (state.isHost) {
             HostSettings(

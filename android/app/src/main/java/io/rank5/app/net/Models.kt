@@ -66,15 +66,17 @@ data class DeckInfo(
     val name: String,
     val emoji: String = "🃏",
     val questionCount: Int = 0,
+    /** How many questions rank the players themselves; those need 3+ players. */
+    val playerQuestionCount: Int = 0,
 )
 
 @Serializable
 data class Question(
     val id: String,
     val deckId: String = "",
-    val kind: String = "",
     val prompt: String,
     val options: List<String>,
+    val kind: String = "",
 ) {
     /** True for "who is most likely to…" rounds, where the options are the players. */
     val usesPlayersAsOptions: Boolean get() = kind == "players"
