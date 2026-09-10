@@ -11,6 +11,9 @@ const val MaxOfflinePlayers = 8
 /** Players-kind questions need a real group before the ranking means anything. */
 const val MinPlayersForPlayerQuestions = 3
 
+/** Replaced with the spotlight player's name when a round is prepared. */
+const val SubjectPlaceholder = "{subject}"
+
 @Serializable
 data class OfflineQuestion(
     val id: String,
@@ -66,8 +69,36 @@ data class OfflineGameState(
         }
     val actor: OfflinePlayer? get() = actors.getOrNull(actorIndex)
     val actorIsSubject: Boolean get() = actor?.id != null && actor?.id == subject?.id
+
+    /** Questions this group can actually play, so round choices stay honest. */
     val availableQuestionCount: Int
-        get() = decks.filter { it.id in selectedDeckIds }.sumOf { it.questions.size }
+        get() = selectedDecks.sumOf { deck ->
+            deck.questions.count { playersKindAllowed || !it.usesPlayersAsOptions }
+        }
+
+    internal val selectedDecks: List<Deck> get() = decks.filter { it.id in selectedDeckIds }
+
+    internal val playersKindAllowed: Boolean
+        get() = playerNames.size >= MinPlayersForPlayerQuestions
+}
+
+/**
+ * Warns during setup when "most likely" questions do not fit this group:
+ * they are dropped below three players, and a selection made only of them
+ * cannot start. Returns null when there is nothing to say.
+ */
+fun offlinePlayerQuestionWarning(state: OfflineGameState): String? {
+    if (state.playersKindAllowed) return null
+    val decks = state.selectedDecks
+    val playerQuestions = decks.sumOf { deck -> deck.questions.count { it.usesPlayersAsOptions } }
+    if (playerQuestions == 0) return null
+    return if (playerQuestions >= decks.sumOf { it.questions.size }) {
+        "These questions rank the players, so you need at least " +
+            "$MinPlayersForPlayerQuestions. Add a player or pick another deck."
+    } else {
+        "$playerQuestions question${if (playerQuestions == 1) "" else "s"} rank the players " +
+            "and need $MinPlayersForPlayerQuestions+. They'll sit out this game."
+    }
 }
 
 fun offlinePlayerValidation(names: List<String>): String? {

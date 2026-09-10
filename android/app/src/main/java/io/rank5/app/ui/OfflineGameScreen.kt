@@ -57,10 +57,12 @@ import io.rank5.app.offline.OfflinePlayer
 import io.rank5.app.offline.OfflineRoundResult
 import io.rank5.app.offline.OfflineScreen
 import io.rank5.app.offline.offlineAllowedRoundChoices
+import io.rank5.app.offline.offlinePlayerQuestionWarning
 import io.rank5.app.offline.offlinePlayerValidation
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.DraggableRankList
 import io.rank5.app.ui.components.GameScaffold
+import io.rank5.app.ui.components.InfoBanner
 import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.Rank5TopBar
@@ -144,15 +146,23 @@ private fun OfflineSetupScreen(
     onExit: () -> Unit,
 ) {
     val validation = offlinePlayerValidation(state.playerNames)
-    val canStart = validation == null && state.decks.any { it.id in state.selectedDeckIds }
+    val playerQuestionWarning = offlinePlayerQuestionWarning(state)
+    val hasPlayableQuestions = state.availableQuestionCount > 0
+    val canStart = validation == null &&
+        state.decks.any { it.id in state.selectedDeckIds } &&
+        hasPlayableQuestions
     val focus = LocalFocusManager.current
     GameScaffold(
         snackbarHostState = snackbarHostState,
         scrollable = true,
         footer = {
             Text(
-                if (canStart) "${state.playerNames.size} players · ${state.selectedRounds} rounds · all set!"
-                else validation ?: "Choose a deck to get started.",
+                when {
+                    canStart -> "${state.playerNames.size} players · ${state.selectedRounds} rounds · all set!"
+                    validation != null -> validation
+                    !hasPlayableQuestions && playerQuestionWarning != null -> playerQuestionWarning
+                    else -> "Choose a deck to get started."
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -279,6 +289,10 @@ private fun OfflineSetupScreen(
                 }
             }
         }
+        if (playerQuestionWarning != null) {
+            InfoBanner(playerQuestionWarning)
+            Spacer(Modifier.height(Spacing.sm))
+        }
         SecondaryCta(
             text = "Browse more decks",
             onClick = onBrowseDecks,
@@ -352,10 +366,15 @@ private fun OfflineHandoffScreen(
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            if (state.actorIsSubject) {
-                "${actor.name}, you’ll secretly rank your real order."
-            } else {
-                "${actor.name}, guess how ${subject.name} ranked the five."
+            when {
+                state.actorIsSubject && state.currentQuestion?.usesPlayersAsOptions == true ->
+                    "${actor.name}, you’ll secretly rank the group."
+                state.actorIsSubject ->
+                    "${actor.name}, you’ll secretly rank your real order."
+                state.currentQuestion?.usesPlayersAsOptions == true ->
+                    "${actor.name}, guess how ${subject.name} ranked everyone."
+                else ->
+                    "${actor.name}, guess how ${subject.name} ranked the five."
             },
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
@@ -417,22 +436,39 @@ private fun OfflineRankingScreen(
         )
         PlayerChip(name = actor.name, colorSeed = actor.id)
         Spacer(Modifier.height(Spacing.md))
+        val rankingPlayers = question.usesPlayersAsOptions
         Text(
-            if (state.actorIsSubject) "Your turn to rank" else "Predict ${subject.name}’s order",
+            when {
+                state.actorIsSubject && rankingPlayers -> "Your turn to call it"
+                state.actorIsSubject -> "Your turn to rank"
+                rankingPlayers -> "Predict ${subject.name}’s call"
+                else -> "Predict ${subject.name}’s order"
+            },
             style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            if (state.actorIsSubject) {
-                "Favorite at the top. Drag to put the five in order."
-            } else {
-                "Drag from what you think ${subject.name} ranked first to last."
+            when {
+                state.actorIsSubject && rankingPlayers ->
+                    "Most likely at the top. Drag to put everyone in order."
+                state.actorIsSubject ->
+                    "Favorite at the top. Drag to put the five in order."
+                rankingPlayers ->
+                    "Drag from who you think ${subject.name} picked first to last."
+                else ->
+                    "Drag from what you think ${subject.name} ranked first to last."
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(Spacing.md))
         Text(question.prompt, style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            rankingLegend(question.options.size, rankingPlayers),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Spacer(Modifier.height(Spacing.md))
         DraggableRankList(
             items = state.localRanking,
@@ -495,7 +531,7 @@ private fun OfflineRevealScreen(
         }
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            "Perfect match = 2,000 pts · every spot off costs 50",
+            scoringLegend(result.subjectRanking.size),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

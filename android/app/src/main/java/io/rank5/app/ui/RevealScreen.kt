@@ -204,7 +204,7 @@ fun RevealScreen(
 
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            text = "Perfect match = 2,000 pts · every spot off costs 50",
+            text = scoringLegend(expectedOptions),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
