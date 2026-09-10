@@ -86,9 +86,13 @@ type Deck struct {
 
 // Round holds per-round data.
 type Round struct {
-	Index          int                 `json:"index"`
-	SubjectID      string              `json:"subjectId"`
-	Question       Question            `json:"question"`
+	Index     int      `json:"index"`
+	SubjectID string   `json:"subjectId"`
+	Question  Question `json:"question"`
+	// Template is the deck question before personalization. Rendering replaces
+	// the subject placeholder and can fill in player options, so a skipped
+	// question is deferred as its template rather than one subject's copy.
+	Template       Question            `json:"-"`
 	SubjectRanking []string            `json:"-"` // option texts in ranked order (best first)
 	Predictions    map[string][]string `json:"-"` // playerID -> ranking
 	Submitted      map[string]bool     `json:"submitted"`
@@ -133,4 +137,18 @@ type DeckInfo struct {
 	Name          string `json:"name"`
 	Emoji         string `json:"emoji,omitempty"`
 	QuestionCount int    `json:"questionCount,omitempty"`
+	// PlayerQuestionCount is how many questions rank the players themselves.
+	// Lobbies use it to warn that those questions need at least 3 players.
+	PlayerQuestionCount int `json:"playerQuestionCount,omitempty"`
+}
+
+// CountPlayerQuestions returns how many questions rank the room's players.
+func CountPlayerQuestions(questions []Question) int {
+	n := 0
+	for _, q := range questions {
+		if q.Kind == QuestionKindPlayers {
+			n++
+		}
+	}
+	return n
 }

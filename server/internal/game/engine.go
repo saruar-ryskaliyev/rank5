@@ -3,6 +3,8 @@ package game
 import (
 	"errors"
 	"fmt"
+	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -23,6 +25,7 @@ var (
 	ErrNoReplacement    = errors.New("no replacement question available")
 	ErrStaleQuestion    = errors.New("question is no longer current")
 	ErrGamePaused       = errors.New("game is paused while a player reconnects")
+	ErrNeedMorePlayers  = errors.New("these questions need at least 3 players")
 )
 
 // NewState creates a lobby state for a room.
@@ -194,6 +197,26 @@ func (s *State) StartGame(hostID string, mode Mode, deckIDs []string, totalRound
 		return ErrInvalidDecks
 	}
 
+	subjectOrder := make([]string, 0, len(s.Players))
+	for _, p := range s.Players {
+		if p.Connected {
+			subjectOrder = append(subjectOrder, p.ID)
+		}
+	}
+
+	// Questions whose options are the players themselves need a real group.
+	// Drop them from small rooms rather than failing the whole game, unless
+	// nothing else is left to play.
+	playable := make([]Question, 0, len(questions))
+	for _, q := range questions {
+		if q.Kind != QuestionKindPlayers || len(subjectOrder) >= MinPlayersForPlayerQuestions {
+			playable = append(playable, q)
+		}
+	}
+	if len(playable) == 0 {
+		return ErrNeedMorePlayers
+	}
+
 	for _, p := range s.Players {
 		p.Score = 0
 	}
@@ -202,23 +225,21 @@ func (s *State) StartGame(hostID string, mode Mode, deckIDs []string, totalRound
 	s.DeckIDs = append([]string(nil), deckIDs...)
 	s.DeckID = deckIDs[0]
 	s.SelectedDecks = append([]DeckInfo(nil), selected...)
-	s.TotalRounds = totalRounds
-	if totalRounds > len(questions) {
-		s.TotalRounds = len(questions)
+	s.SubjectOrder = subjectOrder
+	s.SkipsRemaining = make(map[string]int, len(subjectOrder))
+	for _, id := range subjectOrder {
+		s.SkipsRemaining[id] = DefaultSkipsPerPlayer
 	}
 
-	s.Questions = append([]Question(nil), questions...)
+	s.TotalRounds = totalRounds
+	if totalRounds > len(playable) {
+		s.TotalRounds = len(playable)
+	}
+
+	s.Questions = playable
 	s.QuestionCursor = 0
 	s.TriedQuestionIDs = nil
 
-	s.SubjectOrder = nil
-	s.SkipsRemaining = make(map[string]int)
-	for _, p := range s.Players {
-		if p.Connected {
-			s.SubjectOrder = append(s.SubjectOrder, p.ID)
-			s.SkipsRemaining[p.ID] = DefaultSkipsPerPlayer
-		}
-	}
 	s.RoundIndex = 0
 	s.FinishedRounds = nil
 	s.Paused = false
@@ -239,14 +260,16 @@ func (s *State) beginRound() error {
 	if !ok {
 		return ErrNotEnoughPlayers
 	}
-	q, ok := s.takeNextQuestion()
+	template, ok := s.takeNextQuestion()
 	if !ok {
 		return ErrNoQuestions
 	}
+	q := s.renderQuestion(template, subjectID)
 	s.CurrentRound = &Round{
 		Index:       s.RoundIndex,
 		SubjectID:   subjectID,
 		Question:    q,
+		Template:    template,
 		Predictions: make(map[string][]string),
 		Submitted:   make(map[string]bool),
 		Ready:       make(map[string]bool),
@@ -275,14 +298,78 @@ func (s *State) takeNextQuestion() (Question, bool) {
 	if s.QuestionCursor < 0 || s.QuestionCursor >= len(s.Questions) {
 		return Question{}, false
 	}
+	// Prefer a question that can be rendered for the current room. A
+	// players-kind question becomes unrenderable if the group shrinks
+	// mid-game, in which case an options-kind question is used instead.
+	for i := s.QuestionCursor; i < len(s.Questions); i++ {
+		if s.canRenderQuestion(s.Questions[i]) {
+			s.Questions[s.QuestionCursor], s.Questions[i] = s.Questions[i], s.Questions[s.QuestionCursor]
+			break
+		}
+	}
 	q := s.Questions[s.QuestionCursor]
 	s.QuestionCursor++
 	return q, true
 }
 
+// canRenderQuestion reports whether a question template still works for the
+// players who are in the game right now.
+func (s *State) canRenderQuestion(q Question) bool {
+	if q.Kind != QuestionKindPlayers {
+		return true
+	}
+	return len(s.playerOptionNames()) >= MinPlayersForPlayerQuestions
+}
+
+// playerOptionNames returns one distinct display name per player still in the
+// game, shuffled so the ranking never starts in a suggestive order.
+func (s *State) playerOptionNames() []string {
+	used := make(map[string]bool, len(s.SubjectOrder))
+	names := make([]string, 0, len(s.SubjectOrder))
+	for _, id := range s.SubjectOrder {
+		p := s.PlayerByID(id)
+		if p == nil {
+			continue
+		}
+		names = append(names, uniqueName(p.Nickname, used))
+	}
+	rand.Shuffle(len(names), func(i, j int) { names[i], names[j] = names[j], names[i] })
+	return names
+}
+
+// uniqueName keeps option lists free of duplicates: rankings are keyed by
+// option text, so two players sharing a nickname would otherwise collide.
+func uniqueName(nickname string, used map[string]bool) string {
+	base := strings.TrimSpace(nickname)
+	if base == "" {
+		base = "Player"
+	}
+	name := base
+	for suffix := 2; used[name]; suffix++ {
+		name = fmt.Sprintf("%s (%d)", base, suffix)
+	}
+	used[name] = true
+	return name
+}
+
+// renderQuestion turns a deck template into the question a room actually
+// plays: the subject's name replaces the placeholder, and players-kind
+// questions receive the room's players as their options.
+func (s *State) renderQuestion(q Question, subjectID string) Question {
+	subjectName := "Player"
+	if p := s.PlayerByID(subjectID); p != nil && strings.TrimSpace(p.Nickname) != "" {
+		subjectName = strings.TrimSpace(p.Nickname)
+	}
+	q.Prompt = strings.ReplaceAll(q.Prompt, SubjectPlaceholder, subjectName)
+	if q.Kind == QuestionKindPlayers {
+		q.Options = s.playerOptionNames()
+	}
+	return q
+}
+
 func (s *State) hasSkipReplacement() bool {
 	for i := s.QuestionCursor; i < len(s.Questions); i++ {
-		if !s.TriedQuestionIDs[s.Questions[i].ID] {
+		if !s.TriedQuestionIDs[s.Questions[i].ID] && s.canRenderQuestion(s.Questions[i]) {
 			return true
 		}
 	}
@@ -294,11 +381,13 @@ func (s *State) hasSkipReplacement() bool {
 // the pool because they remain valid for a future subject.
 func (s *State) takeSkipReplacement() (Question, bool) {
 	for i := s.QuestionCursor; i < len(s.Questions); i++ {
-		if s.TriedQuestionIDs[s.Questions[i].ID] {
+		if s.TriedQuestionIDs[s.Questions[i].ID] || !s.canRenderQuestion(s.Questions[i]) {
 			continue
 		}
 		s.Questions[s.QuestionCursor], s.Questions[i] = s.Questions[i], s.Questions[s.QuestionCursor]
-		return s.takeNextQuestion()
+		q := s.Questions[s.QuestionCursor]
+		s.QuestionCursor++
+		return q, true
 	}
 	return Question{}, false
 }
@@ -346,20 +435,23 @@ func (s *State) SkipQuestion(playerID string, roundIndex int, questionID string)
 		return ErrNoReplacement
 	}
 
-	q, ok := s.takeSkipReplacement()
+	template, ok := s.takeSkipReplacement()
 	if !ok {
 		return ErrNoReplacement
 	}
+	q := s.renderQuestion(template, r.SubjectID)
 	// A skipped question was not played, so return it to the tail for a later
 	// round. This keeps the future schedule viable without showing it again to
-	// the same subject in the current round.
-	s.Questions = append(s.Questions, r.Question)
+	// the same subject in the current round. The template is deferred, not the
+	// rendered copy, so a later subject gets their own name and option order.
+	s.Questions = append(s.Questions, r.Template)
 	s.TriedQuestionIDs[q.ID] = true
 	s.SkipsRemaining[playerID]--
 	s.CurrentRound = &Round{
 		Index:       r.Index,
 		SubjectID:   r.SubjectID,
 		Question:    q,
+		Template:    template,
 		Predictions: make(map[string][]string),
 		Submitted:   make(map[string]bool),
 		Ready:       make(map[string]bool),
@@ -642,6 +734,14 @@ func (s *State) RemovePlayer(playerID string, now time.Time) bool {
 		if r.SubjectID == playerID && s.Phase == PhaseRoundSubmit {
 			if subjectID, ok := s.connectedSubjectForRound(); ok {
 				r.SubjectID = subjectID
+				// The question was personalized for the player who left, so
+				// rebuild it for the new subject and the smaller group.
+				if s.canRenderQuestion(r.Template) {
+					r.Question = s.renderQuestion(r.Template, subjectID)
+				} else if replacement, ok := s.takeSkipReplacement(); ok {
+					r.Template = replacement
+					r.Question = s.renderQuestion(replacement, subjectID)
+				}
 				s.TriedQuestionIDs = map[string]bool{r.Question.ID: true}
 				r.SubjectRanking = nil
 				r.Predictions = make(map[string][]string)

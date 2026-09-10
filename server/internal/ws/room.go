@@ -678,7 +678,11 @@ func (r *Room) resolveDecks(deckIDs []string, hostPlayerID string) ([]game.Deck,
 					return nil, nil, fmt.Errorf("deck %q has no questions", d.Title)
 				}
 				resolved = append(resolved, game.Deck{ID: d.ID, Name: d.Title, Emoji: d.Emoji, Questions: d.Questions})
-				infos = append(infos, game.DeckInfo{ID: d.ID, Name: d.Title, Emoji: d.Emoji, QuestionCount: len(d.Questions)})
+				infos = append(infos, game.DeckInfo{
+					ID: d.ID, Name: d.Title, Emoji: d.Emoji,
+					QuestionCount:       len(d.Questions),
+					PlayerQuestionCount: game.CountPlayerQuestions(d.Questions),
+				})
 				continue
 			}
 			if !errors.Is(err, store.ErrNotFound) {
@@ -691,7 +695,11 @@ func (r *Room) resolveDecks(deckIDs []string, hostPlayerID string) ([]game.Deck,
 			return nil, nil, fmt.Errorf("deck %q is no longer available", deckID)
 		}
 		resolved = append(resolved, *d)
-		infos = append(infos, game.DeckInfo{ID: d.ID, Name: d.Name, Emoji: d.Emoji, QuestionCount: len(d.Questions)})
+		infos = append(infos, game.DeckInfo{
+			ID: d.ID, Name: d.Name, Emoji: d.Emoji,
+			QuestionCount:       len(d.Questions),
+			PlayerQuestionCount: game.CountPlayerQuestions(d.Questions),
+		})
 	}
 	return resolved, infos, nil
 }
