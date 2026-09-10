@@ -28,7 +28,7 @@ fun RankCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outlineVariant),
         // Paper-on-paper tactility in light; border-only in dark.
         shadowElevation = if (isSystemInDarkTheme()) Sizes.flatElevation else Sizes.hairline,
     ) {

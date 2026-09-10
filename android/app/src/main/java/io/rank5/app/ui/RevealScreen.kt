@@ -22,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +41,9 @@ import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.RankCard
 import io.rank5.app.ui.components.SectionLabel
+import io.rank5.app.ui.components.StaggeredAppear
 import io.rank5.app.ui.theme.LocalRank5Extras
+import io.rank5.app.ui.theme.Motion
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 import kotlinx.coroutines.delay
@@ -47,9 +51,9 @@ import java.util.Locale
 import kotlin.math.abs
 
 private const val REVEAL_TOTAL_MS = 20_000L
-private const val STAGGER_MS = 70
+private const val STAGGER_MS = Motion.staggerMs
 private const val STAGGER_ENTER_MS = 360
-private const val COUNT_UP_MS = 800
+private const val COUNT_UP_MS = Motion.countUpMs
 
 /** Keeps the disabled Ready label from ballooning with many long nicknames. */
 private const val MAX_WAITING_NAMES_LENGTH = 24
@@ -130,14 +134,16 @@ fun RevealScreen(
 
         val subjectRanking = round.subjectRanking.orEmpty()
         val localScore = round.scores?.get(room.youAre)
-        var revealAudioStarted by remember(round.index, round.question.id) { mutableStateOf(false) }
-        var scoreAudioStarted by remember(round.index, round.question.id) { mutableStateOf(false) }
+        // Saved across rotation so a mid-reveal config change never replays the cues.
+        var revealAudioStarted by rememberSaveable(round.index, round.question.id) { mutableStateOf(false) }
+        var scoreAudioStarted by rememberSaveable(round.index, round.question.id) { mutableStateOf(false) }
+        val reducedMotion = Motion.reducedMotion()
         LaunchedEffect(subjectRanking) {
             if (revealAudioStarted || subjectRanking.size != 5) return@LaunchedEffect
             revealAudioStarted = true
             subjectRanking.indices.forEachIndexed { position, cardIndex ->
                 onRevealCard(cardIndex)
-                if (position < subjectRanking.lastIndex) delay(STAGGER_MS.toLong())
+                if (!reducedMotion && position < subjectRanking.lastIndex) delay(STAGGER_MS.toLong())
             }
         }
         LaunchedEffect(subjectRanking, localScore) {
@@ -145,9 +151,11 @@ fun RevealScreen(
                 return@LaunchedEffect
             }
             scoreAudioStarted = true
-            delay((subjectRanking.lastIndex * STAGGER_MS + STAGGER_ENTER_MS).toLong())
+            if (!reducedMotion) {
+                delay((subjectRanking.lastIndex * STAGGER_MS + STAGGER_ENTER_MS).toLong())
+            }
             onScoreCountUp()
-            delay(COUNT_UP_MS.toLong())
+            if (!reducedMotion) delay(COUNT_UP_MS.toLong())
             onScoreOutcome(localScore)
         }
         StaggeredRankList(items = subjectRanking, roundKey = round.index)
@@ -167,16 +175,24 @@ fun RevealScreen(
             val sorted = predictions.entries.sortedByDescending { (pid, _) ->
                 round.scores?.get(pid) ?: 0
             }
-            sorted.forEach { (pid, guess) ->
-                GuessCard(
-                    predictor = room.players.find { it.id == pid },
-                    predictorId = pid,
-                    guess = guess,
-                    subjectRanking = subjectRanking,
-                    points = round.scores?.get(pid) ?: 0,
-                    roundKey = round.index,
-                    modifier = Modifier.padding(bottom = Spacing.md),
-                )
+            // Guess cards land one beat apart once the subject's list has finished.
+            sorted.forEachIndexed { position, (pid, guess) ->
+                key(round.index, pid) {
+                    StaggeredAppear(
+                        order = subjectRanking.size + position,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        GuessCard(
+                            predictor = room.players.find { it.id == pid },
+                            predictorId = pid,
+                            guess = guess,
+                            subjectRanking = subjectRanking,
+                            points = round.scores?.get(pid) ?: 0,
+                            roundKey = round.index,
+                            modifier = Modifier.padding(bottom = Spacing.md),
+                        )
+                    }
+                }
             }
         }
 
@@ -210,10 +226,11 @@ fun RevealScreen(
     }
 }
 
-/** Subject's real order, cards entering one by one (~120ms apart). */
+/** Subject's real order, cards entering one by one (one stagger beat apart). */
 @Composable
 private fun StaggeredRankList(items: List<String>, roundKey: Int) {
-    var entered by remember(roundKey) { mutableStateOf(false) }
+    // Under reduced motion the list is simply there; otherwise it cascades in.
+    var entered by remember(roundKey) { mutableStateOf(Motion.reducedMotion()) }
     LaunchedEffect(roundKey) { entered = true }
     items.forEachIndexed { i, label ->
         AnimatedVisibility(
@@ -318,15 +335,21 @@ private fun GuessCard(
 /** Display-only delta vs the subject's order — never feeds score math. */
 @Composable
 private fun DeltaChip(delta: Int, modifier: Modifier = Modifier) {
+    val exact = delta == 0
     val color = when {
-        delta == 0 -> MaterialTheme.colorScheme.tertiary
+        exact -> MaterialTheme.colorScheme.onTertiaryContainer
         delta == 1 -> LocalRank5Extras.current.highlightText
         else -> MaterialTheme.colorScheme.error
     }
+    // Exact hits get a filled container so they read at a glance down the card.
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = if (exact) {
+            MaterialTheme.colorScheme.tertiaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        },
     ) {
         Text(
             text = when (delta) {

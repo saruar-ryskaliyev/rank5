@@ -10,6 +10,8 @@ Multiplayer party game inspired by [rank5.io](https://rank5.io/): create a room,
   <img src="docs/screenshots/decks.png" alt="Rank5 deck library" width="30%" />
 </p>
 
+See the [UI / UX review](docs/UI_UX_REVIEW.md) for the evaluation, emulator verification, and additional screenshots.
+
 ## Stack
 
 - **Backend**: Go, WebSockets (`coder/websocket`), in-memory room actors, embedded JSON decks

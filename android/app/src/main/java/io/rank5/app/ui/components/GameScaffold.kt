@@ -24,7 +24,7 @@ import io.rank5.app.ui.theme.Spacing
 import io.rank5.app.ui.theme.animateLayoutChanges
 
 /**
- * The single screen frame: gradient background, insets, edge padding, snackbar
+ * The single screen frame: surface background, insets, edge padding, snackbar
  * host, and an optional footer pinned above the nav bar.
  */
 @Composable
@@ -54,8 +54,8 @@ fun GameScaffold(
           Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
            Column(
             modifier = Modifier
-                .fillMaxSize()
                 .widthIn(max = maxContentWidth)
+                .fillMaxSize()
                 .padding(horizontal = Spacing.md),
            ) {
             Column(

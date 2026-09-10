@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -16,6 +17,7 @@ import io.rank5.app.deck.DeckRepository
 import io.rank5.app.deck.DownloadedDeckStore
 import io.rank5.app.deck.DecksViewModel
 import io.rank5.app.game.GameViewModel
+import io.rank5.app.game.UiStatus
 import io.rank5.app.offline.OfflineGameViewModel
 import io.rank5.app.stats.StatsRepository
 import io.rank5.app.stats.StatsViewModel
@@ -78,6 +80,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Must run before super.onCreate so the system splash hands off cleanly on API 31+
+        // and the compat splash is drawn on API 26-30.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -113,8 +118,8 @@ class AuthViewModel(
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy.asStateFlow()
 
-    private val _status = MutableStateFlow<String?>(null)
-    val status: StateFlow<String?> = _status.asStateFlow()
+    private val _status = MutableStateFlow<UiStatus?>(null)
+    val status: StateFlow<UiStatus?> = _status.asStateFlow()
 
     init {
         viewModelScope.launch { auth.restore() }
@@ -130,7 +135,7 @@ class AuthViewModel(
             try {
                 auth.signInWithGoogle(activity)
             } catch (e: Exception) {
-                _status.value = "Couldn’t sign in with Google. Try again."
+                _status.value = UiStatus.error("Couldn’t sign in with Google. Try again.")
             } finally {
                 _busy.value = false
             }
@@ -140,7 +145,7 @@ class AuthViewModel(
     fun signOut() {
         viewModelScope.launch {
             auth.signOut()
-            _status.value = "Signed out"
+            _status.value = UiStatus.info("Signed out")
         }
     }
 
@@ -149,9 +154,9 @@ class AuthViewModel(
             _busy.value = true
             try {
                 auth.deleteAccount()
-                _status.value = "Account deleted"
+                _status.value = UiStatus.info("Account deleted")
             } catch (e: Exception) {
-                _status.value = "Couldn’t delete the account. Try again."
+                _status.value = UiStatus.error("Couldn’t delete the account. Try again.")
             } finally {
                 _busy.value = false
             }

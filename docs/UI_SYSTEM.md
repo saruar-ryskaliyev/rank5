@@ -9,6 +9,14 @@ The Android UI uses one system font and a deliberately small token set. New UI m
 - Icons: Material rounded icons. Brand and provider artwork are the only image exceptions.
 - Layout: every destination uses `GameScaffold`, which supplies safe insets, 16 dp horizontal alignment, and shared maximum content widths. Interactive targets are at least `Sizes.touchTarget` (48 dp); normal text never drops below 13 sp.
 
+## Interaction details
+
+- Room entry uses a focused Material bottom sheet with scrollable form content and its own visible snackbar host.
+- Use `outline` for interactive input boundaries and `outlineVariant` for decorative card borders. The former is deliberately stronger for contrast.
+- Primary and secondary actions use the large shared shape; primary actions remain at least 56 dp high.
+- Label whole setting rows as switches, and expose deck selection as a checkbox state. Avoid repeating bottom-navigation labels in icon descriptions.
+- Setup keeps the start action visible and explains missing input. Its sections and private handoff remain scrollable at larger text sizes.
+
 ## Motion
 
 Motion explains state changes and preserves continuity; it is not decoration. Following the supplied Google I/O “Motional Intelligence” guidance, transitions must be:

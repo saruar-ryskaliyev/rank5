@@ -3,6 +3,7 @@ package io.rank5.app.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PersonOutline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,21 +90,26 @@ fun ProfileScreen(
 
         when (authState) {
             is AuthState.SignedOut -> {
-                Text(
-                    "Save your progress",
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    "Sign in to keep your game stats, stable identity, and private decks. Playing without an account still works — login is optional.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(Spacing.md))
-                GoogleSignInButton(
-                    onClick = onSignInGoogle,
-                    busy = busy,
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(Modifier.padding(Spacing.lg)) {
+                        Icon(Icons.Rounded.PersonOutline, null, Modifier.size(Sizes.compactIcon))
+                        Spacer(Modifier.height(Spacing.md))
+                        Text("Make yourself at home", style = MaterialTheme.typography.headlineMedium)
+                        Spacer(Modifier.height(Spacing.sm))
+                        Text("Keep your stats, save your favorite decks, and make a few of your own.",
+                            style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(Spacing.md))
+                        GoogleSignInButton(onClick = onSignInGoogle, busy = busy)
+                        Spacer(Modifier.height(Spacing.sm))
+                        Text("Sign-in is optional. Everyone can play.",
+                            style = MaterialTheme.typography.labelSmall)
+                    }
+                }
             }
             is AuthState.SignedIn -> {
                 Surface(
@@ -287,7 +297,7 @@ private fun AudioSettingsSection(
         Column(Modifier.padding(Spacing.md)) {
             SettingSwitchRow(
                 title = "Game sounds",
-                supporting = "Meaningful cues for ranking, reveals, and results",
+                supporting = "Little cues for big reveals",
                 checked = settings.gameSoundsEnabled,
                 onCheckedChange = onGameSoundsEnabled,
             )
@@ -308,10 +318,11 @@ private fun AudioSettingsSection(
                 )
                 TextButton(onClick = onPreviewSound) { Text("Preview sound") }
             }
-            Spacer(Modifier.height(Spacing.sm))
+            HorizontalDivider(Modifier.padding(vertical = Spacing.md),
+                color = MaterialTheme.colorScheme.outlineVariant)
             SettingSwitchRow(
                 title = "Allow in silent mode",
-                supporting = "Off by default so Rank5 follows your device",
+                supporting = "Play sounds even when your phone is silenced",
                 checked = settings.allowInSilentMode,
                 onCheckedChange = onAllowInSilentMode,
             )
@@ -327,8 +338,11 @@ private fun SettingSwitchRow(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().toggleable(
+            value = checked, role = Role.Switch, onValueChange = onCheckedChange,
+        ).padding(vertical = Spacing.sm),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = Spacing.md)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
@@ -338,7 +352,7 @@ private fun SettingSwitchRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

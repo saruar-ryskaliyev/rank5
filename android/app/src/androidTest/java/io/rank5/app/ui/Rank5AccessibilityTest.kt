@@ -39,7 +39,7 @@ class Rank5AccessibilityTest {
                 )
             }
         }
-        compose.onNodeWithText("Choose a game mode").assertIsDisplayed()
+        compose.onNodeWithText("Game night,\nranked.").assertIsDisplayed()
         compose.onNodeWithText("Pass & Play").assertIsDisplayed().assertHasClickAction()
         compose.onNodeWithText("Create room").assertIsDisplayed().assertHasClickAction()
         compose.onNodeWithText("Join room").assertIsDisplayed().assertHasClickAction()

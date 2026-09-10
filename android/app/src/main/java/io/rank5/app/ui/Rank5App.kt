@@ -3,10 +3,6 @@ package io.rank5.app.ui
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -34,7 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -53,11 +52,32 @@ import io.rank5.app.offline.OfflineGameViewModel
 import io.rank5.app.offline.OfflineScreen
 import io.rank5.app.stats.GuestResultClaim
 import io.rank5.app.stats.StatsViewModel
+import io.rank5.app.ui.components.ReconnectBanner
 import io.rank5.app.ui.theme.Motion
 import kotlinx.coroutines.launch
 
 private enum class AppTab { Play, Decks, Profile }
 private enum class AppDestination { LiveGame, OfflineGame, Play, Decks, Profile }
+
+/** Bottom-tab destinations in left-to-right order; games are not tabs. */
+private fun AppDestination.tabIndex(): Int? = when (this) {
+    AppDestination.Play -> 0
+    AppDestination.Decks -> 1
+    AppDestination.Profile -> 2
+    AppDestination.LiveGame, AppDestination.OfflineGame -> null
+}
+
+private val GuestResultClaimSaver = listSaver<GuestResultClaim?, String>(
+    save = { claim -> claim?.let { listOf(it.roomCode, it.playerId, it.reconnectToken) } ?: emptyList() },
+    restore = { parts -> if (parts.size == 3) GuestResultClaim(parts[0], parts[1], parts[2]) else null },
+)
+
+/** Depth in the Decks stack; deeper destinations slide in from the right. */
+private fun DecksRoute.depth(): Int = when (this) {
+    DecksRoute.List -> 0
+    is DecksRoute.Detail, DecksRoute.Generator -> 1
+    is DecksRoute.Editor -> 2
+}
 
 @Composable
 fun Rank5App(
@@ -81,9 +101,12 @@ fun Rank5App(
     val activity = LocalContext.current as ComponentActivity
 
     var tab by rememberSaveable { mutableStateOf(AppTab.Play) }
-    var pendingGuestClaim by remember { mutableStateOf<GuestResultClaim?>(null) }
-    var returnToDecksAfterSignIn by remember { mutableStateOf(false) }
-    var resumeReportAfterSignIn by remember { mutableStateOf(false) }
+    var pendingGuestClaim by rememberSaveable(stateSaver = GuestResultClaimSaver) {
+        mutableStateOf<GuestResultClaim?>(null)
+    }
+    var returnToDecksAfterSignIn by rememberSaveable { mutableStateOf(false) }
+    var resumeReportAfterSignIn by rememberSaveable { mutableStateOf(false) }
+    val saveableStateHolder = rememberSaveableStateHolder()
     val inOnlineGame = state.screen != Screen.Home
     val inLiveGame = inOnlineGame || offlineState.active
     val showBottomBar = !inLiveGame &&
@@ -97,22 +120,22 @@ fun Rank5App(
     )
 
     LaunchedEffect(state.statusMessage) {
-        val msg = state.statusMessage ?: return@LaunchedEffect
-        if (looksLikeError(msg)) soundPlayer.playError()
+        val status = state.statusMessage ?: return@LaunchedEffect
+        if (status.isError) soundPlayer.playError()
         gameVm.statusShown()
-        scope.launch { snackbarHostState.showSnackbar(msg) }
+        scope.launch { snackbarHostState.showSnackbar(status.text) }
     }
     LaunchedEffect(authStatus) {
-        val msg = authStatus ?: return@LaunchedEffect
-        if (looksLikeError(msg)) soundPlayer.playError()
+        val status = authStatus ?: return@LaunchedEffect
+        if (status.isError) soundPlayer.playError()
         authVm.statusShown()
-        scope.launch { snackbarHostState.showSnackbar(msg) }
+        scope.launch { snackbarHostState.showSnackbar(status.text) }
     }
     LaunchedEffect(decksState.statusMessage) {
-        val msg = decksState.statusMessage ?: return@LaunchedEffect
-        if (looksLikeError(msg)) soundPlayer.playError()
+        val status = decksState.statusMessage ?: return@LaunchedEffect
+        if (status.isError) soundPlayer.playError()
         decksVm.statusShown()
-        scope.launch { snackbarHostState.showSnackbar(msg) }
+        scope.launch { snackbarHostState.showSnackbar(status.text) }
     }
     LaunchedEffect(authState) {
         if (authState is AuthState.SignedIn && returnToDecksAfterSignIn) {
@@ -135,8 +158,8 @@ fun Rank5App(
     }
     SoundEventObserver(state = state, soundPlayer = soundPlayer)
 
-    var showLeaveDialog by remember { mutableStateOf(false) }
-    var showOfflineLeaveDialog by remember { mutableStateOf(false) }
+    var showLeaveDialog by rememberSaveable { mutableStateOf(false) }
+    var showOfflineLeaveDialog by rememberSaveable { mutableStateOf(false) }
     BackHandler(enabled = inOnlineGame) { showLeaveDialog = true }
     BackHandler(enabled = offlineState.active) {
         if (offlineState.screen in setOf(OfflineScreen.Setup, OfflineScreen.Results)) {
@@ -217,11 +240,14 @@ fun Rank5App(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = io.rank5.app.ui.theme.Sizes.flatElevation,
+                ) {
                     NavigationBarItem(
                         selected = tab == AppTab.Play,
                         onClick = { tab = AppTab.Play },
-                        icon = { Icon(Icons.Rounded.SportsEsports, contentDescription = stringResource(R.string.nav_play)) },
+                        icon = { Icon(Icons.Rounded.SportsEsports, contentDescription = null) },
                         label = { Text(stringResource(R.string.nav_play)) },
                         colors = navColors,
                     )
@@ -231,14 +257,14 @@ fun Rank5App(
                             tab = AppTab.Decks
                             decksVm.openList()
                         },
-                        icon = { Icon(Icons.Rounded.Style, contentDescription = stringResource(R.string.nav_decks)) },
+                        icon = { Icon(Icons.Rounded.Style, contentDescription = null) },
                         label = { Text(stringResource(R.string.nav_decks)) },
                         colors = navColors,
                     )
                     NavigationBarItem(
                         selected = tab == AppTab.Profile,
                         onClick = { tab = AppTab.Profile },
-                        icon = { Icon(Icons.Rounded.Person, contentDescription = stringResource(R.string.nav_profile)) },
+                        icon = { Icon(Icons.Rounded.Person, contentDescription = null) },
                         label = { Text(stringResource(R.string.nav_profile)) },
                         colors = navColors,
                     )
@@ -261,11 +287,23 @@ fun Rank5App(
             AnimatedContent(
                 targetState = destination,
                 transitionSpec = {
-                    fadeIn(tween(Motion.standardMillis)) togetherWith
-                        fadeOut(tween(Motion.fastMillis))
+                    val fromTab = initialState.tabIndex()
+                    val toTab = targetState.tabIndex()
+                    when {
+                        // Entering or leaving a game: vertical push, like a modal.
+                        fromTab == null || toTab == null ->
+                            Motion.screenEnter() togetherWith Motion.screenExit()
+                        // Tab to tab: slide in the direction of travel along the bar.
+                        else -> {
+                            val forward = toTab > fromTab
+                            Motion.tabEnter(forward) togetherWith Motion.tabExit(forward)
+                        }
+                    }
                 },
                 label = "app destination",
             ) { currentDestination ->
+              // Each tab keeps its own scroll/filter state across switches.
+              saveableStateHolder.SaveableStateProvider(currentDestination.name) {
               when (currentDestination) {
                 AppDestination.LiveGame -> GameFlow(
                     state = state,
@@ -409,28 +447,10 @@ fun Rank5App(
                     },
                 )
               }
+              }
             }
         }
     }
-}
-
-private fun looksLikeError(message: String): Boolean {
-    val normalized = message.lowercase()
-    return listOf(
-        "couldn’t",
-        "couldn't",
-        "something went wrong",
-        "doesn't exist",
-        "required",
-        "you need",
-        "can't reach",
-        "only the",
-        "already locked",
-        "out of skips",
-        "no spare",
-        "no longer available",
-        "choose up to",
-    ).any(normalized::contains)
 }
 
 @Composable
@@ -527,12 +547,10 @@ private fun GameFlow(
     onRequestLeave: () -> Unit,
     soundPlayer: Rank5SoundPlayer,
 ) {
+    Box(Modifier.fillMaxSize()) {
     AnimatedContent(
         targetState = state.screen,
-        transitionSpec = {
-            (slideInVertically { it / 12 } + fadeIn(tween(Motion.standardMillis))) togetherWith
-                fadeOut(tween(Motion.fastMillis))
-        },
+        transitionSpec = { Motion.screenEnter() togetherWith Motion.screenExit() },
         label = "screen",
     ) { screen ->
         when (screen) {
@@ -602,6 +620,11 @@ private fun GameFlow(
             )
         }
     }
+    ReconnectBanner(
+        visible = state.reconnecting,
+        modifier = Modifier.align(Alignment.TopCenter),
+    )
+    }
 
     val room = state.room
     if (room?.paused == true) {
@@ -634,7 +657,21 @@ private fun DecksTab(
     onUseDeck: (io.rank5.app.deck.Deck) -> Unit,
 ) {
     val signedIn = authState is AuthState.SignedIn
-    when (val route = decksState.route) {
+    AnimatedContent(
+        targetState = decksState.route,
+        // Animate only when the destination type changes, not on Detail(a) -> Detail(b).
+        contentKey = { it::class },
+        transitionSpec = {
+            val forward = targetState.depth() > initialState.depth()
+            if (targetState.depth() == initialState.depth()) {
+                Motion.crossfadeEnter() togetherWith Motion.crossfadeExit()
+            } else {
+                Motion.tabEnter(forward) togetherWith Motion.tabExit(forward)
+            }
+        },
+        label = "decks-route",
+    ) { route ->
+    when (route) {
         DecksRoute.List -> DecksListScreen(
             state = decksState,
             snackbarHostState = snackbarHostState,
@@ -714,5 +751,6 @@ private fun DecksTab(
                 else decksVm.openList()
             },
         )
+    }
     }
 }

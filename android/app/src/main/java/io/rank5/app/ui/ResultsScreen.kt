@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -43,12 +45,14 @@ import io.rank5.app.ui.components.InfoBanner
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.RankBadge
 import io.rank5.app.ui.components.SecondaryCta
+import io.rank5.app.ui.components.StaggeredAppear
 import io.rank5.app.ui.theme.LocalRank5Extras
+import io.rank5.app.ui.theme.Motion
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 import java.util.Locale
 
-private const val COUNT_UP_MS = 800
+private const val COUNT_UP_MS = Motion.countUpMs
 
 private fun formatPts(n: Int): String = String.format(Locale.US, "%,d", n)
 
@@ -126,41 +130,56 @@ fun ResultsScreen(
                 )
                 Spacer(Modifier.height(Spacing.md))
                 CoopResults(state = state)
+                // Supporting sections arrive after the headline score has counted up.
                 if (state.roundHistory.isNotEmpty()) {
-                    Spacer(Modifier.height(Spacing.md))
-                    DeckMixSummary(room.canonicalSelectedDecks())
-                    Spacer(Modifier.height(Spacing.md))
-                    RoundBreakdown(state)
+                    StaggeredAppear(order = 2, modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.fillMaxWidth()) {
+                            Spacer(Modifier.height(Spacing.md))
+                            DeckMixSummary(room.canonicalSelectedDecks())
+                            Spacer(Modifier.height(Spacing.md))
+                            RoundBreakdown(state)
+                        }
+                    }
                 }
                 Spacer(Modifier.height(Spacing.md))
-                ShareResultCard(
-                    data = ResultCardData.from(state),
-                    onShare = onShare,
-                )
+                StaggeredAppear(order = 4, modifier = Modifier.fillMaxWidth()) {
+                    ShareResultCard(
+                        data = ResultCardData.from(state),
+                        onShare = onShare,
+                    )
+                }
                 if (!signedIn) {
                     Spacer(Modifier.height(Spacing.md))
-                    SaveStatsPrompt(
-                        loading = signInBusy,
-                        onSave = onSaveStats,
-                    )
+                    StaggeredAppear(order = 5, modifier = Modifier.fillMaxWidth()) {
+                        SaveStatsPrompt(
+                            loading = signInBusy,
+                            onSave = onSaveStats,
+                        )
+                    }
                 } else {
-                    when (claimStatus) {
-                        ClaimStatus.Idle -> Unit
-                        ClaimStatus.Claiming -> {
+                    AnimatedContent(
+                        targetState = claimStatus,
+                        contentKey = { it::class },
+                        transitionSpec = { Motion.crossfadeEnter() togetherWith Motion.crossfadeExit() },
+                        label = "claim-status",
+                    ) { status ->
+                    when (status) {
+                        ClaimStatus.Idle -> Spacer(Modifier.fillMaxWidth())
+                        ClaimStatus.Claiming -> Column {
                             Spacer(Modifier.height(Spacing.md))
                             InfoBanner("Saving this game to your profile…")
                         }
-                        is ClaimStatus.Saved -> {
+                        is ClaimStatus.Saved -> Column {
                             Spacer(Modifier.height(Spacing.md))
                             InfoBanner(
-                                if (claimStatus.games == 1) {
+                                if (status.games == 1) {
                                     "Game saved to your profile"
                                 } else {
-                                    "${claimStatus.games} games saved to your profile"
+                                    "${status.games} games saved to your profile"
                                 },
                             )
                         }
-                        is ClaimStatus.Failed -> {
+                        is ClaimStatus.Failed -> Column {
                             Spacer(Modifier.height(Spacing.md))
                             Surface(
                                 shape = MaterialTheme.shapes.medium,
@@ -169,7 +188,7 @@ fun ResultsScreen(
                             ) {
                                 Column(modifier = Modifier.padding(Spacing.md)) {
                                     Text(
-                                        claimStatus.message,
+                                        status.message,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onErrorContainer,
                                     )
@@ -182,6 +201,7 @@ fun ResultsScreen(
                                 }
                             }
                         }
+                    }
                     }
                 }
                 Spacer(Modifier.height(Spacing.md))

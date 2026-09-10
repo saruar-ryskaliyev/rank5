@@ -56,7 +56,7 @@ data class UiState(
     val communityResults: List<DeckSummary> = emptyList(),
     val communityLoading: Boolean = false,
     val localRanking: List<String> = emptyList(),
-    val statusMessage: String? = null,
+    val statusMessage: UiStatus? = null,
     val busyAction: BusyAction? = null,
     val submitting: Boolean = false,
     val skippingQuestion: Boolean = false,
@@ -168,7 +168,7 @@ class GameViewModel(
                         pendingSkipQuestionId = null
                         _state.update {
                             it.copy(
-                                statusMessage = friendly(event.message),
+                                statusMessage = UiStatus.error(friendly(event.message)),
                                 busyAction = null,
                                 submitting = false,
                                 skippingQuestion = false,
@@ -182,9 +182,9 @@ class GameViewModel(
                             it.copy(
                                 statusMessage = if (liveRoom) {
                                     if (it.reconnecting) it.statusMessage
-                                    else "Connection lost — reconnecting…"
+                                    else UiStatus.error("Connection lost — reconnecting…")
                                 } else {
-                                    friendly(event.message)
+                                    UiStatus.error(friendly(event.message))
                                 },
                                 busyAction = null,
                                 skippingQuestion = false,
@@ -218,7 +218,7 @@ class GameViewModel(
             addDeckSelection(current, info)
         }
         if (updated == current && current.none { it.id == info.id } && current.size >= MaxSelectedDecks) {
-            _state.update { it.copy(statusMessage = "Choose up to five decks.") }
+            _state.update { it.copy(statusMessage = UiStatus.error("Choose up to five decks.")) }
             return
         }
         updateSelection(updated)
@@ -290,7 +290,7 @@ class GameViewModel(
                 _state.update {
                     it.copy(
                         communityLoading = false,
-                        statusMessage = "Couldn’t update the deck library.",
+                        statusMessage = UiStatus.error("Couldn’t update the deck library."),
                     )
                 }
             }
@@ -303,7 +303,7 @@ class GameViewModel(
     fun createAndJoin() {
         val nick = _state.value.nickname.trim()
         if (nick.isEmpty()) {
-            _state.update { it.copy(statusMessage = "Enter a nickname") }
+            _state.update { it.copy(statusMessage = UiStatus.error("Enter a nickname")) }
             return
         }
         viewModelScope.launch {
@@ -314,7 +314,7 @@ class GameViewModel(
                 client.connect(code, nick, authToken = auth.currentToken())
             } catch (e: Exception) {
                 _state.update {
-                    it.copy(busyAction = null, statusMessage = friendly(e.message))
+                    it.copy(busyAction = null, statusMessage = UiStatus.error(friendly(e.message)))
                 }
             }
         }
@@ -324,7 +324,7 @@ class GameViewModel(
         val nick = _state.value.nickname.trim()
         val code = _state.value.joinCode.trim()
         if (nick.isEmpty() || code.isEmpty()) {
-            _state.update { it.copy(statusMessage = "Nickname and room code required") }
+            _state.update { it.copy(statusMessage = UiStatus.error("Nickname and room code required")) }
             return
         }
         _state.update { it.copy(busyAction = BusyAction.Join) }
@@ -377,7 +377,7 @@ class GameViewModel(
             it.copy(
                 submitting = true,
                 statusMessage = if (auto) {
-                    "Time’s up — your current order was submitted."
+                    UiStatus.info("Time’s up — your current order was submitted.")
                 } else {
                     it.statusMessage
                 },
@@ -491,7 +491,7 @@ class GameViewModel(
                 reconnecting = false,
                 roundHistory = history,
                 statusMessage = if (gameAborted) {
-                    "Game ended because fewer than two players remained."
+                    UiStatus.error("Game ended because fewer than two players remained.")
                 } else {
                     st.statusMessage
                 },

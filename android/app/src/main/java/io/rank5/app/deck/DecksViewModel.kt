@@ -3,6 +3,7 @@ package io.rank5.app.deck
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.rank5.app.game.UiStatus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -44,7 +45,7 @@ data class DecksUiState(
     val saving: Boolean = false,
     val showLoginPrompt: Boolean = false,
     val loginPromptForSave: Boolean = false,
-    val statusMessage: String? = null,
+    val statusMessage: UiStatus? = null,
     val loadError: String? = null,
     val editorDirty: Boolean = false,
 )
@@ -60,17 +61,19 @@ fun savedOperationSucceeded(
 ): DecksUiState = state.copy(
     saved = saved,
     savedOperations = state.savedOperations - deckId,
-    statusMessage = if (wasSaved) "Removed from Saved" else "Saved to your library",
+    statusMessage = UiStatus.info(if (wasSaved) "Removed from Saved" else "Saved to your library"),
 )
 
 fun savedOperationFailed(state: DecksUiState, deckId: String, wasSaved: Boolean): DecksUiState =
     state.copy(
         savedOperations = state.savedOperations - deckId,
-        statusMessage = if (wasSaved) {
-            "Couldn’t remove this saved deck. Try again."
-        } else {
-            "Couldn’t save this deck. Try again."
-        },
+        statusMessage = UiStatus.error(
+            if (wasSaved) {
+                "Couldn’t remove this saved deck. Try again."
+            } else {
+                "Couldn’t save this deck. Try again."
+            },
+        ),
     )
 
 private fun blankQuestion(index: Int): DeckQuestion =
@@ -174,7 +177,7 @@ class DecksViewModel(
                     loading = false,
                     communityLoading = false,
                     savedLoading = false,
-                    statusMessage = "Couldn’t load decks. Check your connection and try again.",
+                    statusMessage = UiStatus.error("Couldn’t load decks. Check your connection and try again."),
                     loadError = "Couldn’t load decks. Check your connection and try again.",
                 )
             }
@@ -228,7 +231,7 @@ class DecksViewModel(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     communityLoading = false,
-                    statusMessage = "Couldn’t update the deck library.",
+                    statusMessage = UiStatus.error("Couldn’t update the deck library."),
                     loadError = "Couldn’t update the deck library.",
                 )
             }
@@ -249,7 +252,7 @@ class DecksViewModel(
                 _state.value = _state.value.copy(
                     loading = false,
                     route = DecksRoute.List,
-                    statusMessage = "Couldn’t open that deck. Try again.",
+                    statusMessage = UiStatus.error("Couldn’t open that deck. Try again."),
                 )
             }
         }
@@ -332,7 +335,7 @@ class DecksViewModel(
                     editorGenerated = true,
                     generating = false,
                     generationError = null,
-                    statusMessage = "AI draft ready — review it before saving",
+                    statusMessage = UiStatus.info("AI draft ready — review it before saving"),
                 )
                 persistEditor()
             } catch (cancelled: CancellationException) {
@@ -414,7 +417,7 @@ class DecksViewModel(
                     _state.update {
                         it.copy(
                             downloadOperations = it.downloadOperations - deck.id,
-                            statusMessage = "Removed from this device",
+                            statusMessage = UiStatus.info("Removed from this device"),
                         )
                     }
                 } else {
@@ -423,7 +426,7 @@ class DecksViewModel(
                         it.copy(
                             detail = downloaded,
                             downloadOperations = it.downloadOperations - deck.id,
-                            statusMessage = "Available offline",
+                            statusMessage = UiStatus.info("Available offline"),
                         )
                     }
                 }
@@ -431,7 +434,7 @@ class DecksViewModel(
                 _state.update {
                     it.copy(
                         downloadOperations = it.downloadOperations - deck.id,
-                        statusMessage = "Couldn’t update offline availability. Check your connection.",
+                        statusMessage = UiStatus.error("Couldn’t update offline availability. Check your connection."),
                     )
                 }
             }
@@ -494,7 +497,7 @@ class DecksViewModel(
         val qs = _state.value.editorQuestions
         if (qs.size >= MaxDeckQuestions) {
             _state.value = _state.value.copy(
-                statusMessage = "Maximum $MaxDeckQuestions questions per deck",
+                statusMessage = UiStatus.error("Maximum $MaxDeckQuestions questions per deck"),
             )
             return
         }
@@ -528,7 +531,7 @@ class DecksViewModel(
         val s = _state.value
         val err = validateEditor(s.editorTitle, s.editorEmoji, s.editorQuestions)
         if (err != null) {
-            _state.value = s.copy(statusMessage = err)
+            _state.value = s.copy(statusMessage = UiStatus.error(err))
             return
         }
         viewModelScope.launch {
@@ -546,7 +549,7 @@ class DecksViewModel(
                 }
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Deck saved",
+                    statusMessage = UiStatus.info("Deck saved"),
                     editorDirty = false,
                     editorGenerated = false,
                 )
@@ -555,7 +558,7 @@ class DecksViewModel(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Couldn’t save this deck. Your changes are still here.",
+                    statusMessage = UiStatus.error("Couldn’t save this deck. Your changes are still here."),
                 )
             }
         }
@@ -569,13 +572,13 @@ class DecksViewModel(
                 repo.delete(id)
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Deck deleted",
+                    statusMessage = UiStatus.info("Deck deleted"),
                 )
                 openList()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Couldn’t delete this deck. Try again.",
+                    statusMessage = UiStatus.error("Couldn’t delete this deck. Try again."),
                 )
             }
         }
@@ -594,13 +597,13 @@ class DecksViewModel(
                 _state.value = _state.value.copy(
                     detail = deck,
                     saving = false,
-                    statusMessage = "Published to community",
+                    statusMessage = UiStatus.info("Published to community"),
                 )
                 refresh()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Couldn’t publish this deck. Try again.",
+                    statusMessage = UiStatus.error("Couldn’t publish this deck. Try again."),
                 )
             }
         }
@@ -615,13 +618,13 @@ class DecksViewModel(
                 _state.value = _state.value.copy(
                     detail = deck,
                     saving = false,
-                    statusMessage = "Unpublished — private again",
+                    statusMessage = UiStatus.info("Unpublished — private again"),
                 )
                 refresh()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Couldn’t make this deck private. Try again.",
+                    statusMessage = UiStatus.error("Couldn’t make this deck private. Try again."),
                 )
             }
         }
@@ -639,12 +642,12 @@ class DecksViewModel(
                 repo.report(id, reason.trim())
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Report submitted — thanks",
+                    statusMessage = UiStatus.info("Report submitted — thanks"),
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    statusMessage = "Couldn’t send your report. Try again.",
+                    statusMessage = UiStatus.error("Couldn’t send your report. Try again."),
                 )
             }
         }

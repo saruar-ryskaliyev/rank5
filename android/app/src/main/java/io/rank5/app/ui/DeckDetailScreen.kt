@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +53,7 @@ import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.Rank5TopBar
+import io.rank5.app.ui.components.ShimmerBlock
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
@@ -119,13 +121,15 @@ fun DeckDetailScreen(
         Spacer(Modifier.height(Spacing.md))
 
         if (loading && deck == null) {
+            // Placeholder mirrors the hero card + first question cards.
             Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "Opening deck" },
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(Spacing.md))
-                Text("Opening deck…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                ShimmerBlock(height = Sizes.deckHero * 3)
+                repeat(3) { ShimmerBlock(height = Sizes.listRow * 2) }
             }
             return@GameScaffold
         }

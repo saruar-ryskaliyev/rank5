@@ -1,5 +1,12 @@
 package io.rank5.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,13 +26,17 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import io.rank5.app.ui.theme.Motion
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 import kotlinx.coroutines.delay
+
+private const val PULSE_MS = 500
 
 /**
  * Compact countdown pill driven by an absolute server deadline. Turns urgent
@@ -77,7 +88,26 @@ fun CountdownPill(
     val urgent = seconds <= 10
     // Per component spec: secondary while calm, error when urgent. (The light
     // accentText is persimmon, visually identical to error — urgency would vanish.)
-    val accent = if (urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+    val accent by animateColorAsState(
+        targetValue = if (urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+        animationSpec = tween(Motion.enterMs),
+        label = "countdown-accent",
+    )
+    // Gentle heartbeat on the digits for the final ten seconds; the infinite
+    // transition only exists while urgent so calm rounds don't animate at all.
+    val pulseScale = if (urgent && !Motion.reducedMotion()) {
+        rememberInfiniteTransition(label = "countdown-pulse").animateFloat(
+            initialValue = 1f,
+            targetValue = 1.06f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(PULSE_MS, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "countdown-pulse-scale",
+        ).value
+    } else {
+        1f
+    }
     val progress = if (totalMs > 0) {
         (remainingMs.toFloat() / totalMs.toFloat()).coerceIn(0f, 1f)
     } else {
@@ -110,10 +140,15 @@ fun CountdownPill(
                 text = timeText,
                 style = MaterialTheme.typography.labelLarge,
                 color = accent,
-                modifier = Modifier.semantics {
-                    liveRegion = LiveRegionMode.Polite
-                    contentDescription = announced
-                },
+                modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = pulseScale
+                        scaleY = pulseScale
+                    }
+                    .semantics {
+                        liveRegion = LiveRegionMode.Polite
+                        contentDescription = announced
+                    },
             )
             Spacer(Modifier.height(Spacing.xs))
             LinearProgressIndicator(

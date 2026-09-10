@@ -15,7 +15,8 @@ class SavedDeckStateTest {
 
         assertFalse("movies" in failed.savedOperations)
         assertEquals(listOf(original), failed.saved)
-        assertEquals("Couldn’t save this deck. Try again.", failed.statusMessage)
+        assertEquals("Couldn’t save this deck. Try again.", failed.statusMessage?.text)
+        assertEquals(true, failed.statusMessage?.isError)
     }
 
     @Test fun `successful unsave replaces authoritative list`() {

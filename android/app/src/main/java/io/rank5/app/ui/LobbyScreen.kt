@@ -1,6 +1,7 @@
 package io.rank5.app.ui
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -41,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,6 +78,8 @@ import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.Rank5TopBar
 import io.rank5.app.ui.components.SectionLabel
+import io.rank5.app.ui.components.StaggeredAppear
+import io.rank5.app.ui.theme.Motion
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 import io.rank5.app.ui.theme.animateLayoutChanges
@@ -127,15 +131,21 @@ fun LobbyScreen(
                         enabled = canStart,
                         loading = state.busyAction == BusyAction.Start,
                     )
-                    if (!canStart) {
-                        Spacer(Modifier.height(Spacing.sm))
-                        Text(
-                            "Need at least 2 players — share the code!",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                    AnimatedVisibility(
+                        visible = !canStart,
+                        enter = Motion.itemEnter(),
+                        exit = Motion.itemExit(),
+                    ) {
+                        Column {
+                            Spacer(Modifier.height(Spacing.sm))
+                            Text(
+                                "Need at least 2 players — share the code!",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
             }
@@ -163,14 +173,22 @@ fun LobbyScreen(
         Spacer(Modifier.height(Spacing.md))
         SectionLabel("PLAYERS (${room.players.size})")
         Spacer(Modifier.height(Spacing.md))
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        // Joins grow the list and pop the new chip in; leaves shrink it back.
+        Column(
+            modifier = Modifier.animateLayoutChanges(),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
             room.players.forEach { player ->
-                PlayerChip(
-                    name = player.nickname,
-                    colorSeed = player.id,
-                    isHost = player.isHost,
-                    dimmed = !player.connected,
-                )
+                key(player.id) {
+                    StaggeredAppear(order = 0) {
+                        PlayerChip(
+                            name = player.nickname,
+                            colorSeed = player.id,
+                            isHost = player.isHost,
+                            dimmed = !player.connected,
+                        )
+                    }
+                }
             }
         }
         Spacer(Modifier.height(Spacing.md))
@@ -433,6 +451,7 @@ private fun DeckPickerSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateItem(placementSpec = Motion.placementSpring())
                             .toggleable(
                                 value = selected,
                                 enabled = canAdd,

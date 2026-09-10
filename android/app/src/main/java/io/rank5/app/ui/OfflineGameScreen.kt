@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -38,6 +40,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -53,7 +61,6 @@ import io.rank5.app.offline.offlinePlayerValidation
 import io.rank5.app.ui.components.DeckIconTile
 import io.rank5.app.ui.components.DraggableRankList
 import io.rank5.app.ui.components.GameScaffold
-import io.rank5.app.ui.components.InfoBanner
 import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.Rank5TopBar
@@ -138,31 +145,47 @@ private fun OfflineSetupScreen(
 ) {
     val validation = offlinePlayerValidation(state.playerNames)
     val canStart = validation == null && state.decks.any { it.id in state.selectedDeckIds }
+    val focus = LocalFocusManager.current
     GameScaffold(
         snackbarHostState = snackbarHostState,
         scrollable = true,
         footer = {
+            Text(
+                if (canStart) "${state.playerNames.size} players · ${state.selectedRounds} rounds · all set!"
+                else validation ?: "Choose a deck to get started.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
+            )
             PrimaryCta(
                 text = "Start Pass & Play",
-                onClick = onStart,
+                onClick = { focus.clearFocus(); onStart() },
                 enabled = canStart,
             )
         },
     ) {
         Rank5TopBar(title = "Pass & Play", onBack = onExit)
         Spacer(Modifier.height(Spacing.md))
-        Text("One phone. Everyone plays.", style = MaterialTheme.typography.headlineLarge)
+        Text("Bring everyone in.", style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.semantics { heading() })
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            "Rank privately, hand the phone over, then reveal how well the group knows each other.",
+            "A few names, a favorite topic, and you’re ready.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(Spacing.md))
-        InfoBanner("Works without internet. A privacy screen appears before every turn.")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.Lock, null, Modifier.size(Sizes.metadataIcon),
+                tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.size(Spacing.sm))
+            Text("Private turns. No internet needed.", style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
 
         Spacer(Modifier.height(Spacing.lg))
-        SectionLabel("PLAYERS · ${state.playerNames.size}/$MaxOfflinePlayers")
+        SetupSection("1", "Who’s playing?", "${state.playerNames.size}/$MaxOfflinePlayers")
         Spacer(Modifier.height(Spacing.sm))
         state.playerNames.forEachIndexed { index, name ->
             OutlinedTextField(
@@ -170,89 +193,42 @@ private fun OfflineSetupScreen(
                 onValueChange = { onPlayerName(index, it) },
                 label = { Text("Player ${index + 1} name") },
                 singleLine = true,
+                shape = MaterialTheme.shapes.medium,
+                leadingIcon = {
+                    Text("${index + 1}", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary)
+                },
                 keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
                     imeAction = if (index == state.playerNames.lastIndex) ImeAction.Done else ImeAction.Next,
                 ),
+                keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
                 trailingIcon = if (state.playerNames.size > MinOfflinePlayers) {
                     {
                         IconButton(onClick = { onRemovePlayer(index) }) {
-                            Icon(
-                                Icons.Rounded.PersonRemove,
-                                contentDescription = "Remove player ${index + 1}",
-                            )
+                            Icon(Icons.Rounded.PersonRemove, contentDescription = "Remove player ${index + 1}")
                         }
                     }
                 } else null,
                 modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
             )
         }
-        SecondaryCta(
-            text = "Add player",
+        androidx.compose.material3.TextButton(
             onClick = onAddPlayer,
             enabled = state.playerNames.size < MaxOfflinePlayers,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        if (validation != null && state.playerNames.any(String::isNotBlank)) {
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                validation,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
+        ) {
+            Icon(Icons.Rounded.Add, null, Modifier.size(Sizes.metadataIcon))
+            Spacer(Modifier.size(Spacing.sm))
+            Text("Add player")
         }
-
-        Spacer(Modifier.height(Spacing.lg))
-        SectionLabel("CHOOSE DECKS")
-        Spacer(Modifier.height(Spacing.sm))
-        Text(
-            "Official and downloaded decks available on this phone.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(Spacing.sm))
-        state.decks.forEach { deck ->
-            val selected = deck.id in state.selectedDeckIds
-            Surface(
-                onClick = { onToggleDeck(deck.id) },
-                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
-                shape = MaterialTheme.shapes.medium,
-                color = if (selected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
-                border = BorderStroke(Sizes.hairline, MaterialTheme.colorScheme.outline),
-            ) {
-                Row(
-                    modifier = Modifier.padding(Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DeckIconTile(deck.emoji, deck.title)
-                    Spacer(Modifier.size(Spacing.md))
-                    Column(Modifier.weight(1f)) {
-                        Text(deck.title, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "${deck.questions.size} questions · available offline",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = null,
-                        modifier = Modifier.semantics {
-                            contentDescription = if (selected) "${deck.title} selected" else "Select ${deck.title}"
-                        },
-                    )
-                }
-            }
+        if (validation != null && state.playerNames.all(String::isNotBlank)) {
+            Text(validation, style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.error)
         }
-        SecondaryCta(
-            text = "Browse & download more decks",
-            onClick = onBrowseDecks,
-            modifier = Modifier.fillMaxWidth(),
-        )
 
         Spacer(Modifier.height(Spacing.md))
-        SectionLabel("ROUNDS")
-        Spacer(Modifier.height(Spacing.sm))
+        SetupSection("2", "How many rounds?")
+        Spacer(Modifier.height(Spacing.md))
         val roundChoices = offlineAllowedRoundChoices(state.availableQuestionCount)
         SingleChoiceSegmentedButtonRow(
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -262,10 +238,69 @@ private fun OfflineSetupScreen(
                     selected = state.selectedRounds == count,
                     onClick = { onSelectRounds(count) },
                     shape = SegmentedButtonDefaults.itemShape(index, roundChoices.size),
+                    modifier = Modifier.heightIn(min = Sizes.touchTarget)
+                        .semantics { contentDescription = "$count rounds" },
                 ) { Text(count.toString()) }
             }
         }
+
+        Spacer(Modifier.height(Spacing.lg))
+        SetupSection("3", "Pick your decks", "${state.selectedDeckIds.size} selected")
+        Spacer(Modifier.height(Spacing.sm))
+        Text("Mix a few topics to keep everyone guessing.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(Spacing.md))
+        state.decks.forEach { deck ->
+            val selected = deck.id in state.selectedDeckIds
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
+                shape = MaterialTheme.shapes.medium,
+                color = if (selected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surface,
+                border = BorderStroke(Sizes.hairline, if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.outlineVariant),
+            ) {
+                Row(
+                    modifier = Modifier.toggleable(
+                        value = selected, role = Role.Checkbox,
+                        onValueChange = { onToggleDeck(deck.id) },
+                    ).padding(Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DeckIconTile(deck.emoji, deck.title)
+                    Spacer(Modifier.size(Spacing.md))
+                    Column(Modifier.weight(1f)) {
+                        Text(deck.title, style = MaterialTheme.typography.titleMedium)
+                        Text("${deck.questions.size} questions", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Checkbox(checked = selected, onCheckedChange = null)
+                }
+            }
+        }
+        SecondaryCta(
+            text = "Browse more decks",
+            onClick = onBrowseDecks,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(Spacing.md))
+    }
+}
+
+@Composable
+private fun SetupSection(number: String, title: String, detail: String = "") {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.primaryContainer) {
+            Text(number, Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer)
+        }
+        Text(title, style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(1f).semantics { heading() })
+        if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -280,6 +315,7 @@ private fun OfflineHandoffScreen(
     val subject = state.subject ?: return
     GameScaffold(
         snackbarHostState = snackbarHostState,
+        scrollable = true,
         footer = {
             PrimaryCta(
                 text = "I’m ${actor.name}",
@@ -294,16 +330,23 @@ private fun OfflineHandoffScreen(
             title = "Round ${state.roundIndex + 1} of ${state.schedule.size}",
             onBack = onExit,
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(Spacing.lg))
+        Surface(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.primaryContainer,
+        ) {
         Icon(
             Icons.Rounded.PhoneAndroid,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(Sizes.deckHero).align(Alignment.CenterHorizontally),
+            modifier = Modifier.padding(Spacing.lg).size(Sizes.deckHero),
         )
+        }
         Spacer(Modifier.height(Spacing.lg))
         Text(
-            "Pass the phone to ${actor.name}",
+            "Pass the phone to\n${actor.name}",
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
@@ -315,6 +358,7 @@ private fun OfflineHandoffScreen(
                 "${actor.name}, guess how ${subject.name} ranked the five."
             },
             style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
@@ -336,7 +380,7 @@ private fun OfflineHandoffScreen(
                 )
             }
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(Spacing.lg))
     }
 }
 
@@ -374,13 +418,13 @@ private fun OfflineRankingScreen(
         PlayerChip(name = actor.name, colorSeed = actor.id)
         Spacer(Modifier.height(Spacing.md))
         Text(
-            if (state.actorIsSubject) "Rank your real order" else "Predict ${subject.name}’s order",
-            style = MaterialTheme.typography.headlineLarge,
+            if (state.actorIsSubject) "Your turn to rank" else "Predict ${subject.name}’s order",
+            style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
             if (state.actorIsSubject) {
-                "Drag from your favorite to least favorite. Keep it secret."
+                "Favorite at the top. Drag to put the five in order."
             } else {
                 "Drag from what you think ${subject.name} ranked first to last."
             },

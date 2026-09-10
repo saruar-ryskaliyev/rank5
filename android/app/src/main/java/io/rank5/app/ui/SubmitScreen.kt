@@ -1,14 +1,20 @@
 package io.rank5.app.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,14 +24,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
@@ -41,6 +50,7 @@ import io.rank5.app.ui.components.PlayerChip
 import io.rank5.app.ui.components.PrimaryCta
 import io.rank5.app.ui.components.SectionLabel
 import io.rank5.app.ui.components.SecondaryCta
+import io.rank5.app.ui.theme.Motion
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 
@@ -137,12 +147,33 @@ fun SubmitScreen(
         )
         Spacer(Modifier.height(Spacing.sm))
 
-        if (locked) {
+        // Ranking -> locked confirmation is a real phase change, so it gets the
+        // same push transition as a screen instead of an instant swap.
+        AnimatedContent(
+            targetState = locked,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            transitionSpec = { Motion.screenEnter() togetherWith Motion.screenExit() },
+            label = "submit-phase",
+        ) { isLocked ->
+        Column(Modifier.fillMaxSize()) {
+        if (isLocked) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LockedCheckCircle()
+                val checkScale = remember { Animatable(if (Motion.reducedMotion()) 1f else 0.4f) }
+                LaunchedEffect(Unit) {
+                    checkScale.animateTo(
+                        1f,
+                        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Motion.standardStiffness),
+                    )
+                }
+                LockedCheckCircle(
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = checkScale.value
+                        scaleY = checkScale.value
+                    },
+                )
                 Spacer(Modifier.height(Spacing.sm))
                 Text("Locked in!", style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(Spacing.xs))
@@ -243,6 +274,8 @@ fun SubmitScreen(
                 onDragStart = onDragStart,
                 onRankCross = onRankCross,
             )
+        }
+        }
         }
     }
 }
