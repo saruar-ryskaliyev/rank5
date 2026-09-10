@@ -74,12 +74,16 @@ class DownloadedDeckStore(context: Context) {
         }.getOrNull()
     }
 
-    private companion object {
-        const val DIRECTORY_NAME = "downloaded-decks"
+    companion object {
+        private const val DIRECTORY_NAME = "downloaded-decks"
+
+        /** Deck files bundled in the APK from the server's embedded decks. */
         val BUILT_IN_FILES = listOf(
             "food.json",
+            "most_likely.json",
             "movies.json",
             "personality.json",
+            "fact_check.json",
             "would_you_rather.json",
         )
     }

@@ -1,0 +1,117 @@
+{
+  "id": "fact_check",
+  "name": "Fact Check",
+  "emoji": "🕵️",
+  "questions": [
+    {
+      "id": "fc-1",
+      "prompt": "Which of these has {subject} actually done? Rank definitely → never",
+      "options": [
+        "Sung karaoke",
+        "Broken a bone",
+        "Been on TV",
+        "Ridden a horse",
+        "Gone skydiving"
+      ]
+    },
+    {
+      "id": "fc-2",
+      "prompt": "What would {subject} grab first leaving the house?",
+      "options": [
+        "Phone",
+        "Keys",
+        "Headphones",
+        "Snack",
+        "Water bottle"
+      ]
+    },
+    {
+      "id": "fc-3",
+      "prompt": "How does {subject} spend a free evening?",
+      "options": [
+        "Scrolling",
+        "Cooking",
+        "Out with friends",
+        "Watching a show",
+        "Early night"
+      ]
+    },
+    {
+      "id": "fc-4",
+      "prompt": "What is {subject} secretly great at?",
+      "options": [
+        "Remembering names",
+        "Parallel parking",
+        "Trivia",
+        "Wrapping gifts",
+        "Falling asleep anywhere"
+      ]
+    },
+    {
+      "id": "fc-5",
+      "prompt": "Which excuse would {subject} use to leave a party early?",
+      "options": [
+        "Early start",
+        "Pet needs feeding",
+        "Headache",
+        "Bad reception, missed call",
+        "No excuse, just leaves"
+      ]
+    },
+    {
+      "id": "fc-6",
+      "prompt": "What is on {subject}'s phone screen right now?",
+      "options": [
+        "Group chat",
+        "Maps",
+        "Something half-watched",
+        "A game",
+        "47 open tabs"
+      ]
+    },
+    {
+      "id": "fc-7",
+      "prompt": "How would {subject} spend a surprise free day?",
+      "options": [
+        "Sleep in",
+        "Road trip",
+        "Deep clean",
+        "See friends",
+        "Finally start that project"
+      ]
+    },
+    {
+      "id": "fc-8",
+      "prompt": "What does {subject} always order?",
+      "options": [
+        "The usual",
+        "Whatever is spiciest",
+        "Something new",
+        "The cheapest thing",
+        "Same as the person before"
+      ]
+    },
+    {
+      "id": "fc-9",
+      "prompt": "Which chore does {subject} put off longest?",
+      "options": [
+        "Dishes",
+        "Laundry",
+        "Replying to emails",
+        "Taking out the trash",
+        "Making the bed"
+      ]
+    },
+    {
+      "id": "fc-10",
+      "prompt": "What is {subject}'s most believable hidden talent?",
+      "options": [
+        "Perfect pitch",
+        "Speed reading",
+        "Card tricks",
+        "Accents",
+        "Guessing prices exactly"
+      ]
+    }
+  ]
+}
