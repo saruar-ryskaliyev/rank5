@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 const val QuestionKindOptions = ""
 const val QuestionKindPlayers = "players"
 
+/** Replaced with the spotlight player's name when a round is prepared. */
+const val SubjectPlaceholder = "{subject}"
+
 @Serializable
 data class DeckQuestion(
     val id: String = "",

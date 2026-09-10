@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDownward
@@ -25,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import io.rank5.app.deck.DeckQuestion
 import io.rank5.app.deck.MaxDeckQuestions
 import io.rank5.app.deck.MinDeckQuestions
+import io.rank5.app.deck.SubjectPlaceholder
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.InfoBanner
 import io.rank5.app.ui.components.PrimaryCta
@@ -64,6 +68,7 @@ fun DeckEditorScreen(
     onEmoji: (String) -> Unit,
     onPrompt: (Int, String) -> Unit,
     onOption: (Int, Int, String) -> Unit,
+    onUsesPlayers: (Int, Boolean) -> Unit,
     onAddQuestion: () -> Unit,
     onRemoveQuestion: (Int) -> Unit,
     onMoveQuestion: (Int, Int) -> Unit,
@@ -148,6 +153,7 @@ fun DeckEditorScreen(
                 showErrors = showErrors,
                 onPrompt = { onPrompt(qi, it) },
                 onOption = { oi, value -> onOption(qi, oi, value) },
+                onUsesPlayers = { onUsesPlayers(qi, it) },
                 onRemove = { onRemoveQuestion(qi) },
                 onMove = { to -> onMoveQuestion(qi, to) },
             )
@@ -188,6 +194,7 @@ private fun QuestionEditor(
     showErrors: Boolean,
     onPrompt: (String) -> Unit,
     onOption: (Int, String) -> Unit,
+    onUsesPlayers: (Boolean) -> Unit,
     onRemove: () -> Unit,
     onMove: (Int) -> Unit,
 ) {
@@ -219,21 +226,52 @@ private fun QuestionEditor(
                 onValueChange = { if (it.length <= 200) onPrompt(it) },
                 label = { Text("Prompt") },
                 isError = showErrors && question.prompt.isBlank(),
-                supportingText = { if (showErrors && question.prompt.isBlank()) Text("Add the question players will answer") },
+                supportingText = {
+                    if (showErrors && question.prompt.isBlank()) {
+                        Text("Add the question players will answer")
+                    } else {
+                        Text("Write $SubjectPlaceholder to use the spotlight player's name")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(Spacing.sm))
-            question.options.forEachIndexed { oi, value ->
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = { if (it.length <= 80) onOption(oi, it) },
-                    label = { Text("Option ${oi + 1}") },
-                    isError = showErrors && value.isBlank(),
-                    supportingText = { if (showErrors && value.isBlank()) Text("Required") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                if (oi < 4) Spacer(Modifier.height(Spacing.xs))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = question.usesPlayersAsOptions,
+                        enabled = enabled,
+                        role = Role.Switch,
+                        onValueChange = onUsesPlayers,
+                    )
+                    .padding(vertical = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f).padding(end = Spacing.md)) {
+                    Text("Rank the players", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Everyone in the room becomes an option. Needs 3+ players.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(checked = question.usesPlayersAsOptions, onCheckedChange = null, enabled = enabled)
+            }
+            if (!question.usesPlayersAsOptions) {
+                Spacer(Modifier.height(Spacing.sm))
+                question.options.forEachIndexed { oi, value ->
+                    OutlinedTextField(
+                        value = value,
+                        onValueChange = { if (it.length <= 80) onOption(oi, it) },
+                        label = { Text("Option ${oi + 1}") },
+                        isError = showErrors && value.isBlank(),
+                        supportingText = { if (showErrors && value.isBlank()) Text("Required") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (oi < 4) Spacer(Modifier.height(Spacing.xs))
+                }
             }
         }
     }

@@ -447,7 +447,9 @@ class DecksViewModel(
             return
         }
         val qs = deck.questions.ifEmpty { listOf(blankQuestion(1)) }.mapIndexed { i, q ->
-            val opts = (q.options + List(5) { "" }).take(5)
+            // Only options-kind questions get editable option rows; player
+            // questions are ranked against the room instead.
+            val opts = if (q.usesPlayersAsOptions) emptyList() else (q.options + List(5) { "" }).take(5)
             q.copy(id = q.id.ifBlank { "q${i + 1}" }, options = opts)
         }
         _state.value = _state.value.copy(
@@ -489,6 +491,28 @@ class DecksViewModel(
         if (oIndex !in opts.indices) return
         opts[oIndex] = value
         qs[qIndex] = qs[qIndex].copy(options = opts)
+        _state.value = _state.value.copy(editorQuestions = qs, editorDirty = true)
+        persistEditor()
+    }
+
+    /**
+     * Switches a question between authored options and ranking the players.
+     * Options typed before the switch are kept so toggling back does not lose
+     * the author's work.
+     */
+    fun setQuestionUsesPlayers(index: Int, usesPlayers: Boolean) {
+        val qs = _state.value.editorQuestions.toMutableList()
+        if (index !in qs.indices) return
+        val question = qs[index]
+        if (question.usesPlayersAsOptions == usesPlayers) return
+        qs[index] = if (usesPlayers) {
+            question.copy(kind = QuestionKindPlayers, options = emptyList())
+        } else {
+            question.copy(
+                kind = QuestionKindOptions,
+                options = (question.options + List(5) { "" }).take(5),
+            )
+        }
         _state.value = _state.value.copy(editorQuestions = qs, editorDirty = true)
         persistEditor()
     }
@@ -675,6 +699,9 @@ fun validateEditor(title: String, emoji: String, questions: List<DeckQuestion>):
     }
     questions.forEachIndexed { i, q ->
         if (q.prompt.trim().isEmpty()) return "Question ${i + 1} needs a prompt"
+        // Player questions are ranked against whoever is in the room, so the
+        // author never writes their options.
+        if (q.usesPlayersAsOptions) return@forEachIndexed
         if (q.options.size != 5 || q.options.any { it.trim().isEmpty() }) {
             return "Question ${i + 1} needs 5 options"
         }
@@ -690,6 +717,6 @@ private fun normalizedQuestions(questions: List<DeckQuestion>): List<DeckQuestio
         q.copy(
             id = q.id.ifBlank { "q${i + 1}" },
             prompt = q.prompt.trim(),
-            options = q.options.map { it.trim() },
+            options = if (q.usesPlayersAsOptions) emptyList() else q.options.map { it.trim() },
         )
     }

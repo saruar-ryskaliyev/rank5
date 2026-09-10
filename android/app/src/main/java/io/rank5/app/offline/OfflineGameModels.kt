@@ -11,9 +11,6 @@ const val MaxOfflinePlayers = 8
 /** Players-kind questions need a real group before the ranking means anything. */
 const val MinPlayersForPlayerQuestions = 3
 
-/** Replaced with the spotlight player's name when a round is prepared. */
-const val SubjectPlaceholder = "{subject}"
-
 @Serializable
 data class OfflineQuestion(
     val id: String,

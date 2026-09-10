@@ -187,7 +187,7 @@ fun DeckDetailScreen(
                 Text("Inside this deck", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    "Players rank the five options in each question.",
+                    deckContentsSummary(current.questions),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -470,6 +470,19 @@ private fun OwnerActions(
     }
 }
 
+/** Describes what a deck asks of a room, since not every question is a five-option list. */
+fun deckContentsSummary(questions: List<DeckQuestion>): String {
+    val playerQuestions = questions.count { it.usesPlayersAsOptions }
+    return when {
+        questions.isEmpty() -> "This deck has no questions yet."
+        playerQuestions == questions.size -> "Players rank each other. Needs 3+ players."
+        playerQuestions > 0 ->
+            "Players rank five options, and $playerQuestions question" +
+                "${if (playerQuestions == 1) "" else "s"} rank each other."
+        else -> "Players rank the five options in each question."
+    }
+}
+
 @Composable
 private fun QuestionPreview(number: Int, question: DeckQuestion) {
     Surface(
@@ -501,6 +514,13 @@ private fun QuestionPreview(number: Int, question: DeckQuestion) {
             Spacer(Modifier.height(Spacing.md))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(Modifier.height(Spacing.sm))
+            if (question.usesPlayersAsOptions) {
+                Text(
+                    "Everyone in the room is an option. Needs 3+ players.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             question.options.forEachIndexed { index, option ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),

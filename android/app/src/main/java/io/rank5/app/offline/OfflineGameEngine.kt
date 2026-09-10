@@ -1,6 +1,7 @@
 package io.rank5.app.offline
 
 import io.rank5.app.deck.Deck
+import io.rank5.app.deck.SubjectPlaceholder
 import kotlin.random.Random
 
 class OfflineGameEngine(

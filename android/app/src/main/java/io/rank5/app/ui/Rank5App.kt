@@ -742,6 +742,7 @@ private fun DecksTab(
             onEmoji = decksVm::setEditorEmoji,
             onPrompt = decksVm::setQuestionPrompt,
             onOption = decksVm::setQuestionOption,
+            onUsesPlayers = decksVm::setQuestionUsesPlayers,
             onAddQuestion = decksVm::addQuestion,
             onRemoveQuestion = decksVm::removeQuestion,
             onMoveQuestion = decksVm::moveQuestion,
