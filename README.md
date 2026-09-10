@@ -57,6 +57,25 @@ Client → server: `join_room`, `reconnect`, `attach_account`, `start_game`, `su
 
 Server → client: `welcome`, `room_state`, `error`
 
+### Question types
+
+A deck question is either a normal five-option list or a `"kind": "players"`
+question whose options are the people in the room. Any prompt may contain
+`{subject}`, which becomes the spotlight player's nickname.
+
+Personalization happens when a round begins, not when the deck is scheduled, so
+one template serves every player: `{subject}` resolves to that round's subject
+and player questions receive the current roster as distinct, shuffled options.
+A skipped question is deferred as its original template, so the next subject
+gets their own name and ordering.
+
+Player questions need at least three players. Below that they are dropped from
+the schedule, and a start that would leave nothing to play is rejected with
+`these questions need at least 3 players`. Because rankings can now be shorter
+or longer than five, a prediction's penalty is spread over the ranking's
+maximum displacement: a perfect guess is always 2,000 points and a fully
+reversed one always 1,400, so scores stay comparable across question types.
+
 Ranking and skip commands include the rendered `roundIndex` and `questionId`, so
 the server can reject delayed frames after a question changes. Only the current
 subject can send `skip_question`; a successful skip replaces the question for
@@ -87,13 +106,21 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 Default debug server URL is `http://127.0.0.1:8080` — run `adb reverse tcp:8080 tcp:8080` for each emulator (or point a physical device at your LAN IP).
 
-Verified: debug APK builds; the full game protocol is covered by `server/scripts/e2e`.
+Verified: debug APK builds; the full game protocol is covered by `server/scripts/e2e`,
+including a three-player most-likely round and a personalized prompt.
 
 ### Play flow
 
 1. Enter a nickname → **Create room** (share the code) or **Join room**
 2. Host picks a deck and round count → **Start**
 3. Each round one player is in the spotlight: everyone **Lock In** simultaneously (subject ranks honestly, others predict), then reveal + **Ready** to continue
+
+Some decks make the round about the group itself. **Most Likely To** turns the
+players into the options ("Who is most likely to sleep through their alarm?"),
+and **Fact Check** names the spotlight player in the prompt. Player-ranking
+questions need at least three players; the lobby and Pass & Play setup say so
+before you start. The deck editor exposes both: a **Rank the players** switch
+per question, and `{subject}` in any prompt.
 
 ### Offline Pass & Play
 

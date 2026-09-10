@@ -39,6 +39,8 @@ type roomState struct {
 		Question  struct {
 			ID      string   `json:"id"`
 			DeckID  string   `json:"deckId"`
+			Kind    string   `json:"kind"`
+			Prompt  string   `json:"prompt"`
 			Options []string `json:"options"`
 		} `json:"question"`
 		Scores         map[string]int  `json:"scores"`
@@ -63,7 +65,106 @@ func main() {
 	runMultiDeck(base)
 	log.Printf("=== DISCONNECT LIFECYCLE ===")
 	runDisconnectLifecycle(base)
-	fmt.Println("E2E PASS (skip + team scoring + multi-deck + disconnect/reconnect/leave)")
+	log.Printf("=== PERSONALIZED QUESTIONS ===")
+	runPersonalizedQuestions(base)
+	fmt.Println("E2E PASS (skip + team scoring + multi-deck + disconnect/reconnect/leave + personalized/most-likely)")
+}
+
+// runPersonalizedQuestions covers the two personalization paths: a three
+// player room ranking each other, and a two player room that cannot.
+func runPersonalizedQuestions(base string) {
+	code := mustCreate(base)
+	host, second, third := mustDial(base, code), mustDial(base, code), mustDial(base, code)
+	hostWelcome := join(host, "Maya")
+	secondWelcome := join(second, "Noah")
+	thirdWelcome := join(third, "Iris")
+	drain(host)
+	drain(second)
+	drain(third)
+
+	nicknames := map[string]string{
+		hostWelcome.PlayerID:   "Maya",
+		secondWelcome.PlayerID: "Noah",
+		thirdWelcome.PlayerID:  "Iris",
+	}
+	settings := map[string]any{
+		"mode": "coop", "deckIds": []string{"most_likely"}, "rounds": 1,
+	}
+	mustSend(host, "start_game", settings)
+	hs := waitPhase(host, "ROUND_SUBMIT", 3*time.Second)
+	gs := waitPhase(second, "ROUND_SUBMIT", 3*time.Second)
+	ts := waitPhase(third, "ROUND_SUBMIT", 3*time.Second)
+
+	options := hs.CurrentRound.Question.Options
+	if len(options) != 3 {
+		log.Fatalf("most-likely options = %v, want the three players", options)
+	}
+	want := map[string]bool{"Maya": true, "Noah": true, "Iris": true}
+	for _, option := range options {
+		if !want[option] {
+			log.Fatalf("unexpected option %q in %v", option, options)
+		}
+		delete(want, option)
+	}
+	// Every client must rank the same set, though order is personalized per room.
+	for _, state := range []roomState{gs, ts} {
+		if len(state.CurrentRound.Question.Options) != 3 {
+			log.Fatalf("client saw %v, want three players", state.CurrentRound.Question.Options)
+		}
+	}
+	log.Printf("most-likely options: %v subject=%s", options, nicknames[hs.CurrentRound.SubjectID])
+
+	mustSend(second, "submit_ranking", rankingPayload(gs, gs.CurrentRound.Question.Options))
+	mustSend(third, "submit_ranking", rankingPayload(ts, ts.CurrentRound.Question.Options))
+	mustSend(host, "submit_ranking", rankingPayload(hs, options))
+	reveal := waitPhase(host, "ROUND_REVEAL", 3*time.Second)
+	if reveal.TeamScore <= 0 {
+		log.Fatalf("most-likely round scored %d", reveal.TeamScore)
+	}
+	log.Printf("most-likely reveal teamScore=%d", reveal.TeamScore)
+	for _, c := range []*websocket.Conn{host, second, third} {
+		_ = c.Close(websocket.StatusNormalClosure, "")
+	}
+
+	// A personalized deck names the subject in the prompt itself.
+	code = mustCreate(base)
+	host, second = mustDial(base, code), mustDial(base, code)
+	_ = join(host, "Maya")
+	_ = join(second, "Noah")
+	drain(host)
+	drain(second)
+	mustSend(host, "start_game", map[string]any{
+		"mode": "coop", "deckIds": []string{"fact_check"}, "rounds": 1,
+	})
+	personalized := waitPhase(host, "ROUND_SUBMIT", 3*time.Second)
+	prompt := personalized.CurrentRound.Question.Prompt
+	if strings.Contains(prompt, "{subject}") {
+		log.Fatalf("prompt was not personalized: %q", prompt)
+	}
+	if !strings.Contains(prompt, "Maya") && !strings.Contains(prompt, "Noah") {
+		log.Fatalf("prompt does not name the subject: %q", prompt)
+	}
+	log.Printf("personalized prompt: %q", prompt)
+
+	// The same room cannot play a most-likely deck with only two players.
+	mustSend(host, "leave_room", map[string]any{})
+	_ = host.Close(websocket.StatusNormalClosure, "")
+	_ = second.Close(websocket.StatusNormalClosure, "")
+
+	code = mustCreate(base)
+	host, second = mustDial(base, code), mustDial(base, code)
+	_ = join(host, "Maya")
+	_ = join(second, "Noah")
+	drain(host)
+	drain(second)
+	mustSend(host, "start_game", settings)
+	message := waitError(host, 3*time.Second)
+	if !strings.Contains(message, "at least 3 players") {
+		log.Fatalf("two-player most-likely error = %q", message)
+	}
+	log.Printf("two-player most-likely rejected: %q", message)
+	_ = host.Close(websocket.StatusNormalClosure, "")
+	_ = second.Close(websocket.StatusNormalClosure, "")
 }
 
 func runDisconnectLifecycle(base string) {
@@ -326,6 +427,25 @@ func mustRead(c *websocket.Conn, timeout time.Duration) envelope {
 	env, err := readEnv(c, timeout)
 	must(err)
 	return env
+}
+
+// waitError expects the server to refuse a command, and returns its message.
+func waitError(c *websocket.Conn, timeout time.Duration) string {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		env, err := readEnv(c, time.Until(deadline))
+		must(err)
+		if env.Type != "error" {
+			continue
+		}
+		var payload struct {
+			Message string `json:"message"`
+		}
+		must(json.Unmarshal(env.Payload, &payload))
+		return payload.Message
+	}
+	log.Fatal("expected an error response")
+	return ""
 }
 
 func waitPhase(c *websocket.Conn, phase string, timeout time.Duration) roomState {
