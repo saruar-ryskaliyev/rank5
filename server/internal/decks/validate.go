@@ -20,6 +20,16 @@ const (
 	DefaultEmoji = "🃏"
 )
 
+// ValidKind reports whether a question kind is one this build understands.
+func ValidKind(kind string) bool {
+	switch kind {
+	case game.QuestionKindOptions, game.QuestionKindPlayers:
+		return true
+	default:
+		return false
+	}
+}
+
 // ValidateInput checks title/emoji/questions for create/update.
 func ValidateInput(title, emoji string, questions []game.Question) error {
 	title = strings.TrimSpace(title)
@@ -43,6 +53,15 @@ func ValidateInput(title, emoji string, questions []game.Question) error {
 		}
 		if utf8.RuneCountInString(prompt) > MaxPromptLen {
 			return fmt.Errorf("question %d: prompt is too long", i+1)
+		}
+		if !ValidKind(q.Kind) {
+			return fmt.Errorf("question %d: unknown question type", i+1)
+		}
+		if q.Kind == game.QuestionKindPlayers {
+			if len(q.Options) != 0 {
+				return fmt.Errorf("question %d: player questions use the room's players as options", i+1)
+			}
+			continue
 		}
 		if len(q.Options) != RequiredOpts {
 			return fmt.Errorf("question %d: must have exactly %d options", i+1, RequiredOpts)
@@ -73,12 +92,16 @@ func NormalizeInput(title, emoji string, questions []game.Question) (string, str
 		if id == "" {
 			id = fmt.Sprintf("q%d", i+1)
 		}
-		opts := make([]string, len(q.Options))
-		for j, o := range q.Options {
-			opts[j] = strings.TrimSpace(o)
+		var opts []string
+		if q.Kind != game.QuestionKindPlayers {
+			opts = make([]string, len(q.Options))
+			for j, o := range q.Options {
+				opts[j] = strings.TrimSpace(o)
+			}
 		}
 		out[i] = game.Question{
 			ID:      id,
+			Kind:    strings.TrimSpace(q.Kind),
 			Prompt:  strings.TrimSpace(q.Prompt),
 			Options: opts,
 		}

@@ -43,6 +43,44 @@ func TestValidateInput_OptionCount(t *testing.T) {
 	}
 }
 
+func TestValidateInput_PlayersKind(t *testing.T) {
+	qs := validQuestions(MinQuestions)
+	qs[0] = game.Question{ID: "q1", Kind: game.QuestionKindPlayers, Prompt: "Who is most likely to oversleep?"}
+	if err := ValidateInput("Deck", "🎯", qs); err != nil {
+		t.Fatalf("players-kind question rejected: %v", err)
+	}
+
+	qs[0].Options = []string{"a", "b", "c", "d", "e"}
+	if err := ValidateInput("Deck", "🎯", qs); err == nil {
+		t.Fatal("expected an error when a players-kind question authors options")
+	}
+}
+
+func TestValidateInput_UnknownKind(t *testing.T) {
+	qs := validQuestions(MinQuestions)
+	qs[0].Kind = "wagers"
+	if err := ValidateInput("Deck", "🎯", qs); err == nil {
+		t.Fatal("expected unknown kind error")
+	}
+}
+
+func TestNormalizeInput_PlayersKindDropsOptions(t *testing.T) {
+	_, _, qs := NormalizeInput("Deck", "🎯", []game.Question{{
+		Kind:    game.QuestionKindPlayers,
+		Prompt:  " Who is most likely to reply first? ",
+		Options: []string{"stale", "options"},
+	}})
+	if qs[0].Kind != game.QuestionKindPlayers {
+		t.Fatalf("kind=%q", qs[0].Kind)
+	}
+	if len(qs[0].Options) != 0 {
+		t.Fatalf("options=%v, want none", qs[0].Options)
+	}
+	if qs[0].Prompt != "Who is most likely to reply first?" {
+		t.Fatalf("prompt=%q", qs[0].Prompt)
+	}
+}
+
 func TestNormalizeInput_Defaults(t *testing.T) {
 	title, emoji, qs := NormalizeInput("  Hi  ", "", []game.Question{{
 		Prompt:  "  P  ",

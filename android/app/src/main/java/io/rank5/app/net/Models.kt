@@ -72,9 +72,13 @@ data class DeckInfo(
 data class Question(
     val id: String,
     val deckId: String = "",
+    val kind: String = "",
     val prompt: String,
     val options: List<String>,
-)
+) {
+    /** True for "who is most likely to…" rounds, where the options are the players. */
+    val usesPlayersAsOptions: Boolean get() = kind == "players"
+}
 
 @Serializable
 data class PlayerView(

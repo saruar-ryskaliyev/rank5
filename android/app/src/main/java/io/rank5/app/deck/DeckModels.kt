@@ -2,12 +2,20 @@ package io.rank5.app.deck
 
 import kotlinx.serialization.Serializable
 
+/** Question kinds. Empty means five authored options; [QuestionKindPlayers]
+ * means the room's players become the options when a round starts. */
+const val QuestionKindOptions = ""
+const val QuestionKindPlayers = "players"
+
 @Serializable
 data class DeckQuestion(
     val id: String = "",
+    val kind: String = QuestionKindOptions,
     val prompt: String = "",
     val options: List<String> = List(5) { "" },
-)
+) {
+    val usesPlayersAsOptions: Boolean get() = kind == QuestionKindPlayers
+}
 
 @Serializable
 data class DeckSummary(

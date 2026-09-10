@@ -50,12 +50,30 @@ type FinishedRound struct {
 	Scores    map[string]int `json:"scores"` // playerID -> points
 }
 
-// Question is one prompt with exactly five options.
+// Question kinds. An empty kind is the original five-authored-options shape.
+const (
+	QuestionKindOptions = ""
+	QuestionKindPlayers = "players"
+)
+
+const (
+	// MinPlayersForPlayerQuestions keeps a players-kind ranking meaningful:
+	// with two people the honest order carries almost no information.
+	MinPlayersForPlayerQuestions = 3
+	// SubjectPlaceholder is replaced with the round subject's nickname when the
+	// round begins, so one template can be personalized for every player.
+	SubjectPlaceholder = "{subject}"
+)
+
+// Question is one prompt with its rankable options. Options-kind questions
+// carry exactly five authored options; players-kind questions author none and
+// receive the room's players as options when the round is rendered.
 type Question struct {
 	ID      string   `json:"id"`
 	DeckID  string   `json:"deckId,omitempty"`
+	Kind    string   `json:"kind,omitempty"`
 	Prompt  string   `json:"prompt"`
-	Options []string `json:"options"` // length 5
+	Options []string `json:"options"`
 }
 
 // Deck is a named collection of questions.

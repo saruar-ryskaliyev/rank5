@@ -1,10 +1,15 @@
 package io.rank5.app.offline
 
 import io.rank5.app.deck.Deck
+import io.rank5.app.deck.QuestionKindOptions
+import io.rank5.app.deck.QuestionKindPlayers
 import kotlinx.serialization.Serializable
 
 const val MinOfflinePlayers = 2
 const val MaxOfflinePlayers = 8
+
+/** Players-kind questions need a real group before the ranking means anything. */
+const val MinPlayersForPlayerQuestions = 3
 
 @Serializable
 data class OfflineQuestion(
@@ -12,7 +17,10 @@ data class OfflineQuestion(
     val prompt: String,
     val options: List<String>,
     val deckId: String = "",
-)
+    val kind: String = QuestionKindOptions,
+) {
+    val usesPlayersAsOptions: Boolean get() = kind == QuestionKindPlayers
+}
 
 data class OfflinePlayer(
     val id: String,
