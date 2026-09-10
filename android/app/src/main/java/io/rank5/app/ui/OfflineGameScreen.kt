@@ -240,17 +240,27 @@ private fun OfflineSetupScreen(
         SetupSection("2", "How many rounds?")
         Spacer(Modifier.height(Spacing.md))
         val roundChoices = offlineAllowedRoundChoices(state.availableQuestionCount)
-        SingleChoiceSegmentedButtonRow(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        ) {
-            roundChoices.forEachIndexed { index, count ->
-                SegmentedButton(
-                    selected = state.selectedRounds == count,
-                    onClick = { onSelectRounds(count) },
-                    shape = SegmentedButtonDefaults.itemShape(index, roundChoices.size),
-                    modifier = Modifier.heightIn(min = Sizes.touchTarget)
-                        .semantics { contentDescription = "$count rounds" },
-                ) { Text(count.toString()) }
+        if (roundChoices.isEmpty()) {
+            Text(
+                "Pick a deck this group can play to choose a length.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            SingleChoiceSegmentedButtonRow(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            ) {
+                roundChoices.forEachIndexed { index, count ->
+                    SegmentedButton(
+                        selected = state.selectedRounds == count,
+                        onClick = { onSelectRounds(count) },
+                        shape = SegmentedButtonDefaults.itemShape(index, roundChoices.size),
+                        modifier = Modifier.heightIn(min = Sizes.touchTarget)
+                            .semantics {
+                                contentDescription = if (count == 1) "1 round" else "$count rounds"
+                            },
+                    ) { Text(count.toString()) }
+                }
             }
         }
 

@@ -27,17 +27,7 @@ class OfflineGameViewModel(
                     val selected = retained.ifEmpty {
                         decks.firstOrNull()?.id?.let(::setOf).orEmpty()
                     }
-                    val availableQuestions = decks.filter { it.id in selected }.sumOf { it.questions.size }
-                    val roundChoices = offlineAllowedRoundChoices(availableQuestions)
-                    state.copy(
-                        decks = decks,
-                        selectedDeckIds = selected,
-                        selectedRounds = if (state.selectedRounds in roundChoices) {
-                            state.selectedRounds
-                        } else {
-                            roundChoices.last()
-                        },
-                    )
+                    state.copy(decks = decks, selectedDeckIds = selected).withValidRounds()
                 }
             }
         }
@@ -55,15 +45,22 @@ class OfflineGameViewModel(
         )
     }
 
+    // The player count decides whether player-ranking questions are playable,
+    // so both directions re-check the available length.
     fun addPlayer() = _state.update { state ->
         if (state.playerNames.size >= MaxOfflinePlayers) state
-        else state.copy(playerNames = state.playerNames + "")
+        else state.copy(playerNames = state.playerNames + "").withValidRounds()
     }
 
     fun removePlayer(index: Int) = _state.update { state ->
         if (state.playerNames.size <= MinOfflinePlayers || index !in state.playerNames.indices) state
-        else state.copy(playerNames = state.playerNames.filterIndexed { i, _ -> i != index })
+        else state.copy(
+            playerNames = state.playerNames.filterIndexed { i, _ -> i != index },
+        ).withValidRounds()
     }
+
+    private fun OfflineGameState.withValidRounds(): OfflineGameState =
+        copy(selectedRounds = clampOfflineRounds(selectedRounds, availableQuestionCount))
 
     fun toggleDeck(id: String) = _state.update { state ->
         val selected = state.selectedDeckIds
@@ -72,12 +69,7 @@ class OfflineGameViewModel(
             id !in selected -> selected + id
             else -> selected
         }
-        val available = state.decks.filter { it.id in next }.sumOf { it.questions.size }
-        val choices = offlineAllowedRoundChoices(available)
-        state.copy(
-            selectedDeckIds = next,
-            selectedRounds = if (state.selectedRounds in choices) state.selectedRounds else choices.last(),
-        )
+        state.copy(selectedDeckIds = next).withValidRounds()
     }
 
     fun selectRounds(rounds: Int) = _state.update { state ->

@@ -110,6 +110,20 @@ fun offlinePlayerValidation(names: List<String>): String? {
     return null
 }
 
-fun offlineAllowedRoundChoices(questionCount: Int): List<Int> =
-    listOf(3, 5, 6, 10, 15, 20).filter { it <= questionCount }
-        .ifEmpty { listOf(questionCount.coerceAtLeast(1)) }
+/**
+ * Keeps the chosen length valid as decks and players change. Falls back to the
+ * previous value when nothing is playable, so setup can explain the reason
+ * instead of silently picking an unplayable length.
+ */
+fun clampOfflineRounds(current: Int, questionCount: Int): Int {
+    val choices = offlineAllowedRoundChoices(questionCount)
+    return if (current in choices) current else choices.lastOrNull() ?: current
+}
+
+fun offlineAllowedRoundChoices(questionCount: Int): List<Int> {
+    // Nothing playable means there is no honest round count to offer; setup
+    // explains the reason instead of showing a length nobody can start.
+    if (questionCount <= 0) return emptyList()
+    return listOf(3, 5, 6, 10, 15, 20).filter { it <= questionCount }
+        .ifEmpty { listOf(questionCount) }
+}

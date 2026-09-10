@@ -210,6 +210,18 @@ class OfflineGameEngineTest {
     }
 
     @Test
+    fun `round choices are empty when nothing is playable and rounds stay clamped`() {
+        assertEquals(emptyList<Int>(), offlineAllowedRoundChoices(0))
+        assertEquals(listOf(3, 5, 6), offlineAllowedRoundChoices(6))
+        assertEquals(listOf(2), offlineAllowedRoundChoices(2))
+
+        // Nothing playable keeps the previous length instead of throwing.
+        assertEquals(5, clampOfflineRounds(5, 0))
+        assertEquals(6, clampOfflineRounds(10, 6))
+        assertEquals(3, clampOfflineRounds(3, 6))
+    }
+
+    @Test
     fun `duplicate names still produce distinct ranking options`() {
         val players = listOf(
             OfflinePlayer("local-0", "Sam"),
