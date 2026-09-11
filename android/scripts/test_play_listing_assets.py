@@ -44,7 +44,7 @@ def main():
     assert len(shots) >= 2, shots
     for p in shots:
         w, h = jpeg_size(p)
-        assert (w, h) == (1080, 1920), (p, w, h)
+        assert (w, h) == (1080, 2160), (p, w, h)
         assert max(w, h) <= 2 * min(w, h)
     print(f"ok icon+feature+{len(shots)} screenshots")
 

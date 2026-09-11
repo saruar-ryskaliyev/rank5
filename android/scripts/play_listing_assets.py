@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate Play Store listing bitmaps.
 
-Source screenshots (docs/screenshots/), cropped to 1080×1920 JPEG:
+Source screenshots (docs/screenshots/), scaled to fit 1080×2160 JPEG
+(Play’s 2:1 max; side-padded with rank5_background so chrome is not cropped):
   home.png            -> docs/play/screenshots/phone-home.jpg
   pass-and-play.png   -> docs/play/screenshots/phone-pass-and-play.jpg
   decks.png           -> docs/play/screenshots/phone-decks.jpg
@@ -37,6 +38,11 @@ BAR_WIDTHS = (48.0, 39.0, 30.0, 21.0, 12.0)
 FIELD = (0x5A, 0x3F, 0xD6)
 BAR_FILL = (0xFF, 0xFF, 0xFF)
 LAST_BAR = (0xB3, 0x26, 0x4B)
+
+# Play: long side ≤ 2× short side. 1080×2160 is the tallest allowed at this width.
+SHOT_W = 1080
+SHOT_H = 2160
+PAD_COLOR = "F8F7FC"  # rank5_background
 
 SCREENSHOTS = (
     ("home.png", "phone-home.jpg"),
@@ -141,23 +147,44 @@ def write_feature_graphic() -> None:
     write_png(PLAY / "feature-graphic-1024x500.png", 1024, 500, pixels, color_type=2)
 
 
-def crop_screenshots() -> None:
+def export_screenshots() -> None:
     dest_dir = PLAY / "screenshots"
     dest_dir.mkdir(parents=True, exist_ok=True)
     for src_name, dest_name in SCREENSHOTS:
         src = SCREENSHOTS_SRC / src_name
         dest = dest_dir / dest_name
-        cropped = dest.with_suffix(".png")
-        subprocess.check_call(["sips", "-c", "1920", "1080", str(src), "--out", str(cropped)])
-        subprocess.check_call(["sips", "-s", "format", "jpeg", str(cropped), "--out", str(dest)])
-        cropped.unlink()
+        scaled = dest.with_suffix(".scaled.png")
+        padded = dest.with_suffix(".png")
+        try:
+            # 1080×2400 → 972×2160, then pad sides to 1080×2160.
+            subprocess.check_call(
+                ["sips", "--resampleHeight", str(SHOT_H), str(src), "--out", str(scaled)]
+            )
+            # -p must precede --padColor; otherwise sips ignores the pad size.
+            subprocess.check_call(
+                [
+                    "sips",
+                    "-p",
+                    str(SHOT_H),
+                    str(SHOT_W),
+                    "--padColor",
+                    PAD_COLOR,
+                    str(scaled),
+                    "--out",
+                    str(padded),
+                ]
+            )
+            subprocess.check_call(["sips", "-s", "format", "jpeg", str(padded), "--out", str(dest)])
+        finally:
+            scaled.unlink(missing_ok=True)
+            padded.unlink(missing_ok=True)
 
 
 def main() -> None:
     PLAY.mkdir(parents=True, exist_ok=True)
     write_icon()
     write_feature_graphic()
-    crop_screenshots()
+    export_screenshots()
 
 
 if __name__ == "__main__":
