@@ -1,0 +1,335 @@
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+\input{glyphtounicode}
+
+
+% \newcommand{\customSubheading}[3]{ % Custom command name
+%   \vspace{-2pt}\item
+%     \begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}}lcr}
+%       \textbf{#1} & \textbf{#2} & {\small \textbf{#3}} \\
+%     \end{tabular*}\vspace{-7pt}
+% }
+
+
+
+% \newcommand{\customSubheading}[3]{ % Custom command name
+%   \vspace{-2pt}\item
+%     \begin{tabular*}{1.0\textwidth}{@{}c@{\extracolsep{\fill}}c@{\extracolsep{\fill}}c@{}}
+%       \textbf{#1} & \textbf{#2} & {\small \textbf{#3}} \\
+%     \end{tabular*}\vspace{-7pt}
+% }
+
+
+\newcommand{\customSubheading}[3]{ % Custom command name
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}{@{}c@{\extracolsep{\fill}}c@{\extracolsep{\fill}}c@{}}
+      {\small \textbf{#1}} & {\small \textbf{#2}} & {\small \textbf{#3}} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+
+
+
+
+
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-6pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-6pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{%
+  \item\small{#1}%
+}
+
+\newcommand{\classesList}[4]{
+    \item\small{
+        {#1 #2 #3 #4 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & \textbf{\small #2} \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{1.001\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & \textbf{\small #2}\\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{%
+  \begin{itemize}[leftmargin=0.0in, label={}, itemsep=0pt, parsep=0pt, partopsep=0pt, topsep=0pt]%
+}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}[1][leftmargin=1em]{%
+  \begin{itemize}[#1, itemsep=1pt, parsep=0pt, partopsep=0pt, topsep=3pt]%
+}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
+%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
+% \end{tabular*}
+
+% \begin{center}
+%     {\Huge \scshape Saruar Nurlybek} \\ \vspace{1pt}
+%         \small Astana, Kazakhstan \\
+%     \small \raisebox{-0.1\height}\faPhone\ +77027308866 ~ \href{mailto:saruar.nb@gmail.com}{\raisebox{-0.2\height}\faEnvelope\  \underline{saruar.nb@gmail.com}} ~
+%     \href{https://www.linkedin.com/in/saruar-nurlybek/}{\raisebox{-0.2\height}\faLinkedin\ \underline{linkedin.com/in/saruar-nurlybek}}  ~
+%     \href{https://github.com/saruar-ryskaliyev/}{\raisebox{-0.2\height}\faGithub\ \underline{github.com/saruar-ryskaliyev}}
+%     \vspace{-8pt}
+% \end{center}
+
+\begin{center}
+    {\Huge \scshape Saruar Nurlybek} \\
+    \vspace{5pt}
+    \small Astana, Kazakhstan \ \textbar\ +77027308866 \ \textbar\ \href{mailto:saruar.nb@gmail.com}{\underline{saruar.nb@gmail.com}} \ \textbar\ \href{https://github.com/saruar-ryskaliyev/}{\underline{github.com/saruar-ryskaliyev}}
+    \vspace{-8pt}
+\end{center}
+
+
+
+% \begin{center}
+% \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l c r}
+%     \begin{tabular}[t]{@{}l@{}}
+%         \footnotesize Astana, Kazakhstan \\
+%         \footnotesize \underline{github.com/saruar-ryskaliyev}
+%     \end{tabular} &
+%     {\fontsize{20}{18}\selectfont \scshape Saruar Nurlybek} &
+%     \begin{tabular}[t]{@{}r@{}}
+%         \footnotesize +77027308866 \\
+%         \footnotesize \underline{saruar.nb@gmail.com}
+%     \end{tabular} \\
+% \end{tabular*}
+% \end{center}
+
+
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Nazarbayev University}{Aug. 2021 -- Jun. 2025}
+      {Bachelor of Science in Computer Science}{Astana, Kazakhstan}
+  \resumeSubHeadingListEnd
+
+
+%------RELEVANT COURSEWORK-------
+% \section{Relevant Coursework}
+%     %\resumeSubHeadingListStart
+%         \begin{multicols}{4}
+%             \begin{itemize}[itemsep=-5pt, parsep=3pt]
+%                 \item\small Computer Organization
+%                 \item Programming Languages
+%                 \item Data Structures
+%                 \item Formal Languages
+%                 \item Artificial Intelligence
+%                 \item Algorithms
+%                 \item Software Engineering
+%                 \item Database Systems
+%             \end{itemize}
+%         \end{multicols}
+%         \vspace*{2.0\multicolsep}
+%     %\resumeSubHeadingListEnd
+
+
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+\resumeSubHeadingListStart
+
+\customSubheading
+  {AI Engineer}{Nace.ai}{Dec. 2025 -- Present}
+
+\vspace{-12pt}
+{\footnotesize \textit{Applied AI research company building specialized models and agents for enterprise audit, accounting, and compliance workflows.}}
+\\[-1pt]
+{\footnotesize \textit{Tech: Python, JavaScript, DuckDB, Temporal, Redis, AWS S3}}
+\vspace{-10pt}
+\resumeItemListStart[leftmargin=1em]
+\resumeItem{Automated the categorization of \textbf{1M+ financial records} by building a SQL-generating agent with DuckDB and fuzzy entity matching.}
+\resumeItem{Reduced invalid-document ingestion latency by \textbf{40\%} by rejecting malformed PDFs through HTTP-header and magic-byte validation before full download and parsing.}
+\resumeItem{Reduced LLM tool-call attempts from up to \textbf{20 to 1} by enforcing required schema fields and hardening agent-tool contracts.}
+\resumeItem{Eliminated Temporal gRPC payload-limit and workflow-history failures in large audit jobs by externalizing payloads as pass-by-reference artifacts with backward-compatible resolution.}
+\resumeItem{Reduced audit-agent log retrieval latency by \textbf{70\%} by implementing a distributed Redis cache backed by durable AWS S3 storage.}
+\resumeItemListEnd
+
+\customSubheading
+  {Software Engineer}{The Fashion People Ltd.}
+  {Jul. 2024 -- Jul. 2025}
+
+\vspace{-12pt}
+{\footnotesize \textit{Venture-backed fashion-tech startup operating Garderob and building multi-tenant resale marketplaces for European fashion brands.}}
+\\[-1pt]
+{\footnotesize \textit{Tech: Go, Express.js, JavaScript, Next.js, React, MongoDB}}
+\vspace{-10pt}
+
+\resumeItemListStart[leftmargin=1em]
+\resumeItem{Built catalog, cart, and checkout workflows for a multi-tenant Next.js commerce platform serving \textbf{35,000 monthly active users} using React and JavaScript.}
+\resumeItem{Reduced page-load time by \textbf{40\%} and backend request volume by \textbf{10\%} by migrating high-traffic pages from client-side rendering to SSR, pre-rendering, and cache-aware data fetching.}
+\resumeItem{Increased user engagement by \textbf{25\%} and reduced bounced sessions by \textbf{60 per day} by developing a responsive React component system and streamlining product-discovery and checkout flows.}
+\resumeItem{Reduced p95 catalog API latency by \textbf{64\%} by migrating performance-critical endpoints from Express.js to Go and restructuring request-processing logic.}
+\resumeItem{Cut product-discovery query latency by \textbf{70\%} across \textbf{415,000+ listing records} by optimizing MongoDB aggregation pipelines, indexes, projections, and pagination.}
+\resumeItemListEnd
+
+\customSubheading
+  {Software Engineer Intern}{nFactorial Incubator}{Jun. 2024 -- Jul. 2024}
+
+\vspace{-12pt}
+{\footnotesize \textit{10-week incubator focused on building AI startups with mentorship in development, design, and strategy.}}
+\vspace{-10pt}
+
+\resumeItemListStart[leftmargin=1em]
+\resumeItem{Implemented a real-time car search and notification system by parsing data for over \textbf{50,000} vehicle listings from an online marketplace, enabling users to receive instant alerts for new listings that matched their criteria.}
+\resumeItem{Integrated GPT-3.5 with vector databases using Python, enhancing natural language processing capabilities and improving query accuracy by \textbf{40\%}.}
+\resumeItem{Secured a \textbf{\$1,500 scholarship} from Chevron Corporation for the nFactorial Incubator program, ranking in the \textbf{top 5\%} of \textbf{2,000+} applicants.}
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+\vspace{-16pt}
+
+%-----------PROJECTS-----------
+%-----------PROJECTS-----------
+\section{Projects}
+\vspace{-5pt}
+\resumeSubHeadingListStart
+\resumeProjectHeading
+{\textbf{\href{https://github.com/saruar-ryskaliyev/bidflow}{bidflow}} $|$ \emph{Java, gRPC, Protobuf, Gradle, JMH}}{}
+\resumeItemListStart[leftmargin=1em]
+
+
+
+
+\resumeItem{Built a GSP auction engine: ranks 64 candidates and prices winners in \textbf{275 ns} with zero allocation per request (JMH).}
+\resumeItem{Sharded budgets into expiring per-server leases: \textbf{1.91 ns} local check on the request path, with a proved overspend bound.}
+\resumeItem{Built a seed-reproducible fault simulator (crashes, partitions, clock skew); verified the overspend bound across 120 scenarios and caught two protocol bugs.}
+\resumeItemListEnd
+\vspace{-13pt}
+\resumeProjectHeading
+{\textbf{\href{https://github.com/saruar-ryskaliyev/rank5}{Rank5}} $|$ \emph{Go, WebSockets, Kotlin, Jetpack Compose, PostgreSQL}}{}
+\resumeItemListStart[leftmargin=1em]
+\resumeItem{Built a multiplayer party game where friends join private rooms with a code and rank five options each round in real time.}
+\resumeItem{Engineered an authoritative Go WebSocket backend using in-memory room actors for synchronized co-op and versus gameplay, server-side scoring, reconnection handling, and stale-message rejection.}
+\resumeItem{Developed a native Android client in Kotlin and Jetpack Compose with custom deck creation, Google sign-in, profile statistics, and real-time gameplay.}
+\resumeItemListEnd
+
+
+
+
+\resumeSubHeadingListEnd
+\vspace{-15pt}
+
+
+\section{Leadership / Extracurricular}
+    \resumeSubHeadingListStart
+        \resumeSubheading{ACM Student Chapter}{Spring 2022 -- Spring 2025}{Nazarbayev University}{}
+            \resumeItemListStart [leftmargin=1em]
+              \resumeItem{Co-organized the HackNU 2023 hackathon, securing \textbf{\$2,230} in sponsorship from \textbf{EPAM} and Umag/Zapis.kz, supporting \textbf{300} participants to develop tech solutions and present final prototypes.}
+                \resumeItem{Organized monthly talks with engineers from \textbf{Meta, Amazon, and Bloomberg}, with an average of 70 CS student attendees aged 18–25 per session, and fostering networking and career growth opportunities.}
+
+            \resumeItemListEnd
+
+    \resumeSubHeadingListEnd
+%
+%-----------PROGRAMMING SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, Java, C, C++, Go, JavaScript, TypeScript, Swift} \\
+     \textbf{Technologies/Frameworks}{: Git, FastAPI, React, Next.js, Express.js, UIKit, CocoaPods, Temporal} \\
+    }}
+ \end{itemize}
+ \vspace{-16pt}
+
+
+%-----------INVOLVEMENT---------------
+
+
+
+\end{document}
