@@ -1,7 +1,6 @@
 package io.rank5.app.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -46,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -57,6 +55,7 @@ import io.rank5.app.game.BusyAction
 import io.rank5.app.game.UiState
 import io.rank5.app.ui.components.GameScaffold
 import io.rank5.app.ui.components.PrimaryCta
+import io.rank5.app.ui.components.Rank5BrandMark
 import io.rank5.app.ui.theme.Sizes
 import io.rank5.app.ui.theme.Spacing
 import java.util.Locale
@@ -85,10 +84,7 @@ fun HomeScreen(
         scrollable = true,
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painterResource(R.drawable.rank5_brand_mark), contentDescription = null,
-                modifier = Modifier.size(Sizes.avatarLarge),
-            )
+            Rank5BrandMark()
             Column(Modifier.weight(1f).padding(start = Spacing.sm)) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.brand_tagline), style = MaterialTheme.typography.labelSmall,
