@@ -2,4 +2,6 @@
 <resources>
     <color name="ic_launcher_background">#5A3FD6</color>
     <color name="rank5_background">#F8F7FC</color>
+    <color name="brand_mark_bar">#5A3FD6</color>
+    <color name="brand_mark_last">#B3264B</color>
 </resources>

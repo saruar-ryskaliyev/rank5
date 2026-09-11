@@ -21,3 +21,9 @@ android/local.properties
 android/**/build/
 android/captures/
 android/.cxx/
+
+# Upload key (never commit)
+android/keystore.properties
+keystore.properties
+*.jks
+*.keystore

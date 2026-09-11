@@ -331,7 +331,7 @@ const privacyHTML = `<!DOCTYPE html>
 h1{font-size:1.5rem}h2{font-size:1.1rem;margin-top:1.5rem}</style></head>
 <body>
 <h1>Rank5 Privacy Policy</h1>
-<p>Last updated: August 4, 2026</p>
+<p>Last updated: September 11, 2026</p>
 <p>Rank5 is a party game. You can play without an account. If you sign in, we store the information below so we can keep your profile and game history.</p>
 <h2>What we collect</h2>
 <ul>
@@ -348,6 +348,8 @@ h1{font-size:1.5rem}h2{font-size:1.1rem;margin-top:1.5rem}</style></head>
 </ul>
 <h2>How we use data</h2>
 <p>To authenticate you, show your profile and private stats, attribute game results to your account, and keep decks you create.</p>
+<h2>Processors</h2>
+<p>Google provides sign-in. If the player generates a deck, the topic is sent to the configured AI provider. The Android app talks to the Rank5 API over HTTPS.</p>
 <h2>Retention and deletion</h2>
 <p>You can delete your account in the Rank5 app (Profile → Delete account). Deletion removes your user record. Past game rows keep nicknames and scores but unlink your account id. See also our <a href="/account-deletion">account deletion</a> page.</p>
 <h2>Contact</h2>
@@ -369,5 +371,5 @@ h1{font-size:1.5rem}ol{padding-left:1.25rem}</style></head>
 </ol>
 <p>This permanently deletes your account, your decks, and your saved-deck bookmarks. Game history rows may remain as anonymous nickname/score records with your user id removed.</p>
 <p>If you cannot access the app, contact the developer listed on the Google Play store listing and request deletion with the Google account email you used to sign in.</p>
-<p><a href="/privacy">Privacy policy</a></p>
+<p>The same HTTPS <a href="/privacy">privacy policy</a> applies.</p>
 </body></html>`

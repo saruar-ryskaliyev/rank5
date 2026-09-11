@@ -77,10 +77,11 @@ object ResultShareManager {
         paint.color = surface
         canvas.drawRoundRect(RectF(64f, 64f, 1016f, 1286f), ROOMY_RADIUS, ROOMY_RADIUS, paint)
 
+        drawBrandMark(canvas, paint, left = 120f, top = 100f, size = 72f)
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         paint.color = violet
         paint.textSize = HEADING_TEXT
-        canvas.drawText("RANK5", 120f, 160f, paint)
+        canvas.drawText("RANK5", 208f, 154f, paint)
 
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         paint.color = surfaceVariant
@@ -112,6 +113,27 @@ object ResultShareManager {
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         canvas.drawText("Play Rank5", 120f, 1255f, paint)
         return bitmap
+    }
+
+    /** Matches `res/drawable/rank5_brand_mark.xml` in 108-unit viewport space. */
+    private fun drawBrandMark(canvas: Canvas, paint: Paint, left: Float, top: Float, size: Float) {
+        paint.style = Paint.Style.FILL
+        val scale = size / 108f
+        val barHeight = 8f * scale
+        val radius = 4f * scale
+        val originX = left + 26f * scale
+        val widths = floatArrayOf(56f, 47f, 38f, 29f, 20f)
+        val tops = floatArrayOf(24f, 37f, 50f, 63f, 76f)
+        widths.forEachIndexed { index, width ->
+            paint.color = if (index == widths.lastIndex) rose else violet
+            val barTop = top + tops[index] * scale
+            canvas.drawRoundRect(
+                RectF(originX, barTop, originX + width * scale, barTop + barHeight),
+                radius,
+                radius,
+                paint,
+            )
+        }
     }
 
     private fun drawCoop(canvas: Canvas, paint: Paint, data: ResultCardData) {

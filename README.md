@@ -104,7 +104,9 @@ cd android
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Default debug server URL is `http://127.0.0.1:8080` — run `adb reverse tcp:8080 tcp:8080` for each emulator (or point a physical device at your LAN IP).
+The production API is `https://rank5-production.up.railway.app`. Release builds use it; debug still uses `http://10.0.2.2:8080` (Android emulator loopback to the host). For a physical device in debug, point at your LAN IP instead.
+
+The Play Store artifact is an AAB from `./gradlew :app:bundleRelease`, not `assembleDebug`. Play listing bitmaps live in `docs/play/`.
 
 Verified: debug APK builds; the full game protocol is covered by `server/scripts/e2e`,
 including a three-player most-likely round and a personalized prompt.
@@ -144,6 +146,4 @@ server/          Go module
 android/         Compose app
 ```
 
-## Phase 2 (not implemented)
-
-Accounts, Postgres, community deck uploads / moderation — see architecture notes in the plan. Decks are loaded behind a narrow interface so the game engine does not need to change.
+Online play needs the Railway API; Pass & Play does not.

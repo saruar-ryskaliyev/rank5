@@ -46,6 +46,7 @@ import io.rank5.app.BuildConfig
 import io.rank5.app.R
 import io.rank5.app.audio.AudioSettings
 import io.rank5.app.auth.AuthState
+import io.rank5.app.net.ServerEndpoints
 import io.rank5.app.stats.StatsResponse
 import io.rank5.app.stats.StatsUiState
 import io.rank5.app.ui.components.GameScaffold
@@ -77,7 +78,7 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     var confirmDelete by remember { mutableStateOf(false) }
-    val privacyUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/privacy"
+    val privacyUrl = ServerEndpoints.privacyUrl(ServerEndpoints.baseUrl(BuildConfig.DEBUG))
 
     LaunchedEffect(Unit) { onAppear() }
 

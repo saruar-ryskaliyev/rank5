@@ -8,3 +8,8 @@
 .externalNativeBuild
 .cxx
 app/build
+
+# Upload key (never commit)
+keystore.properties
+*.jks
+*.keystore

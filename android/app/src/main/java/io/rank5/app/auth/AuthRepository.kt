@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import io.rank5.app.BuildConfig
+import io.rank5.app.net.ServerEndpoints
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,7 @@ private val Context.authDataStore by preferencesDataStore(name = "rank5_auth")
 
 class AuthRepository(
     private val context: Context,
-    private val api: AuthApi = AuthApi(BuildConfig.SERVER_BASE_URL),
+    private val api: AuthApi = AuthApi(ServerEndpoints.baseUrl(BuildConfig.DEBUG)),
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val tokenKey = stringPreferencesKey("jwt")

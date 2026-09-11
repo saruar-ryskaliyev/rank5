@@ -94,9 +94,7 @@ class GameClient(
         authToken: String?,
         doReconnect: Boolean,
     ) {
-        val wsBase = baseUrl
-            .replace("https://", "wss://")
-            .replace("http://", "ws://")
+        val wsBase = ServerEndpoints.webSocketBase(baseUrl)
         http.webSocket("$wsBase/ws?code=$code") {
             _events.emit(ClientEvent.Connected)
             val writer = launch { writeLoop(this@webSocket) }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,16 +9,15 @@ plugins {
 
 android {
     namespace = "io.rank5.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.rank5.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
         // Web OAuth client ID from Google Cloud (serverClientId for Credential Manager).
         // Do NOT put the client_secret here — only the Web client ID is needed.
         buildConfigField(
@@ -24,6 +25,23 @@ android {
             "GOOGLE_WEB_CLIENT_ID",
             "\"502849293667-6jq9gcriej5buaq06n7ttkvgvalpvui8.apps.googleusercontent.com\"",
         )
+    }
+
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -34,10 +52,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
-        }
-        debug {
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
