@@ -28,7 +28,9 @@ class PlayReleaseConfigTest {
         val backup = File("src/main/res/xml/backup_rules.xml").readText()
         assertTrue(extraction.contains("data-extraction-rules"))
         assertTrue(extraction.contains("<exclude"))
+        assertTrue(extraction.contains("domain=\"file\""))
         assertTrue(backup.contains("full-backup-content"))
         assertTrue(backup.contains("<exclude"))
+        assertTrue(backup.contains("domain=\"file\""))
     }
 }
