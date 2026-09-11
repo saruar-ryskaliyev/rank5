@@ -3,6 +3,7 @@ package io.rank5.app.deck
 import io.rank5.app.BuildConfig
 import io.rank5.app.auth.AuthRepository
 import io.rank5.app.auth.AuthState
+import io.rank5.app.net.ServerEndpoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
@@ -10,7 +11,7 @@ import kotlinx.coroutines.withContext
 class DeckRepository(
     private val auth: AuthRepository,
     private val downloads: DownloadedDeckStore,
-    private val api: DeckApi = DeckApi(BuildConfig.SERVER_BASE_URL),
+    private val api: DeckApi = DeckApi(ServerEndpoints.baseUrl(BuildConfig.DEBUG)),
 ) {
     val downloadedDecks: StateFlow<List<Deck>> = downloads.decks
 

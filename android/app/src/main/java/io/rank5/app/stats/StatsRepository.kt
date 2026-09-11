@@ -3,13 +3,14 @@ package io.rank5.app.stats
 import io.rank5.app.BuildConfig
 import io.rank5.app.auth.AuthRepository
 import io.rank5.app.auth.AuthState
+import io.rank5.app.net.ServerEndpoints
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.delay
 
 class StatsRepository(
     private val auth: AuthRepository,
-    private val api: StatsApi = StatsApi(BuildConfig.SERVER_BASE_URL),
+    private val api: StatsApi = StatsApi(ServerEndpoints.baseUrl(BuildConfig.DEBUG)),
 ) {
     suspend fun load(): StatsResponse = api.getStats(requireToken())
 

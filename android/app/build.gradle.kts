@@ -16,7 +16,6 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
         // Web OAuth client ID from Google Cloud (serverClientId for Credential Manager).
         // Do NOT put the client_secret here — only the Web client ID is needed.
         buildConfigField(
@@ -34,10 +33,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
-        }
-        debug {
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:8080\"")
         }
     }
     compileOptions {

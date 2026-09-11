@@ -14,6 +14,7 @@ import io.rank5.app.net.DeckInfo
 import io.rank5.app.net.GameClient
 import io.rank5.app.net.Phase
 import io.rank5.app.net.RoomStateView
+import io.rank5.app.net.ServerEndpoints
 import io.rank5.app.net.WelcomePayload
 import io.rank5.app.net.canonicalSelectedDecks
 import io.rank5.app.net.canonicalDeckIds
@@ -139,7 +140,7 @@ class GameViewModel(
     private val auth: AuthRepository,
     private val decks: DeckRepository,
     private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    private val baseUrl: String = BuildConfig.SERVER_BASE_URL,
+    private val baseUrl: String = ServerEndpoints.baseUrl(BuildConfig.DEBUG),
 ) : ViewModel() {
     private val client = GameClient(baseUrl, viewModelScope)
 
